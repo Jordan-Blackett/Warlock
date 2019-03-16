@@ -8,7 +8,7 @@
 int main() {
 	std::cout << "Hello World" << std::endl;
 
-	sf::RenderWindow window(sf::VideoMode(ScreenWidth, ScreenHeight, 32), "Warlock!");
+	sf::RenderWindow window(sf::VideoMode(ScreenWidth, ScreenHeight, 32), "Warlock_Server!");
 	sf::CircleShape shape(100.f);
 	shape.setFillColor(sf::Color::Cyan);
 
