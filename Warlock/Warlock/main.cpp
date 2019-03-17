@@ -1,6 +1,12 @@
 #include <iostream>
 #include <SFML\Graphics.hpp>
+
+#include "ScreenManager.h"
+
+
 #include <Box2D\Box2D.h>
+
+#include "EntityBox.h"
 
 #define ScreenWidth 1024
 #define ScreenHeight 768
@@ -9,8 +15,9 @@ int main() {
 	std::cout << "Hello World" << std::endl;
 
 	sf::RenderWindow window(sf::VideoMode(ScreenWidth, ScreenHeight, 32), "Warlock!");
-	sf::CircleShape shape(100.f);
-	shape.setFillColor(sf::Color::Cyan);
+
+	// ScreenManager
+	ScreenManager::GetInstance()->Initialize(&window);
 
 	while (window.isOpen())
 	{
@@ -21,8 +28,12 @@ int main() {
 				window.close();
 		}
 
+		// Update
+		ScreenManager::GetInstance()->Update();
+
+		// Render
 		window.clear();
-		window.draw(shape);
+		ScreenManager::GetInstance()->Render();
 		window.display();
 	}
 
