@@ -24,7 +24,8 @@ private:
 	// Physics
 	b2World * world;
 	const float scale = 32.f; // Convert between pixel and real-world coordinates
-	const float gravity = 0.0f;
+	const float verticalGravity = 0.0f;
+	const float horizontalGravity = 0.0f;
 
 	// Physics tick rate - Timestep
 	sf::Clock simulationClock_;

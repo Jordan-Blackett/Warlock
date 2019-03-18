@@ -44,6 +44,8 @@ void GameScreen::Update()
 
 	while (accumulator >= dt)
 	{
+		player->movePlayer();
+
 		// Run Simulation
 		world->Step(1 / 60.0f, 8, 3);
 
@@ -61,7 +63,7 @@ void GameScreen::Render()
 
 void GameScreen::InitPhysicalWorld()
 {
-	world = new b2World(b2Vec2(0.0f, gravity));
+	world = new b2World(b2Vec2(horizontalGravity, verticalGravity));
 	world->SetAllowSleeping(true);
 	world->SetContinuousPhysics(true);
 }
