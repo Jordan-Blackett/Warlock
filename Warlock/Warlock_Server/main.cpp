@@ -1,5 +1,5 @@
 #include <iostream>
-
+#include <string>
 #include <WinSock2.h>
 #include <Ws2tcpip.h>
 #include <stdio.h>
@@ -18,7 +18,7 @@ int main() {
 
 	if (WSAStartup(winsockVersion, &winsockData))
 	{
-		printf("WSAStartup failed: %d", WSAGetLastError());
+		printf("WSAStartup failed: %d\n", WSAGetLastError());
 		return 1;
 	}
 
@@ -30,7 +30,7 @@ int main() {
 	SOCKET listeningSocket = socket(addressFamily, type, protocol);
 	if (listeningSocket == INVALID_SOCKET)
 	{
-		printf("socket failed: %d", WSAGetLastError());
+		printf("socket failed: %d\n", WSAGetLastError());
 		return 1;
 	}
 
@@ -42,7 +42,7 @@ int main() {
 
 	if (bind(listeningSocket, (sockaddr*)&hint, sizeof(hint)) == SOCKET_ERROR)
 	{
-		printf("bind failed: %d", WSAGetLastError());
+		printf("bind failed: %d\n", WSAGetLastError());
 		return 1;
 	}
 	printf("Listening socket\n");
@@ -57,7 +57,7 @@ int main() {
 	SOCKET clientSocket = accept(listeningSocket, (sockaddr*)&client, &clientSize);
 	if (clientSocket == SOCKET_ERROR)
 	{
-		printf("client accept failed: %d", WSAGetLastError());
+		printf("client accept failed: %d\n", WSAGetLastError());
 		return 1;
 	}
 
@@ -69,12 +69,12 @@ int main() {
 
 	if (getnameinfo((sockaddr*)&client, sizeof(client), host, NI_MAXHOST, service, NI_MAXSERV, 0) == 0)
 	{
-		printf("%s connected on port %s", host, service);
+		printf("%s connected on port %s\n", host, service);
 	}
 	else
 	{
 		inet_ntop(AF_INET, &client.sin_addr, host, NI_MAXHOST);
-		printf("%s connected on port %s", host, ntohs(client.sin_port));
+		printf("%s connected on port %s\n", host, ntohs(client.sin_port));
 	}
 
 	// Close listening socket
@@ -92,14 +92,16 @@ int main() {
 		int bytesReceived = recv(clientSocket, buf, SOCKET_BUFFER_SIZE, flags);
 		if (bytesReceived == SOCKET_ERROR)
 		{
-			printf("Error in recv() Quitting");
+			printf("Error in recv() Quitting\n");
 			break;
 		}
 		else if(bytesReceived == 0)
 		{
-			printf("Client disconnected");
+			printf("Client disconnected\n");
 			break;
 		}
+
+		std::cout << std::string(buf, 0, bytesReceived) << std::endl;
 
 		// Echo message back to client
 		send(clientSocket, buf, bytesReceived + 1, flags);
@@ -110,6 +112,8 @@ int main() {
 
 	// Cleanup winsock
 	WSACleanup();
+
+	system("pause");
 
 	return 0;
 }
