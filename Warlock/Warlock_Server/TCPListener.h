@@ -6,20 +6,26 @@
 #include <WinSock2.h>
 #include <Ws2tcpip.h>
 
+
+
 #pragma comment (lib, "ws2_32.lib")
 
-#include "TCPSocket.h"
+//#include "TCPSocket.h"
+#include <functional>
 
-#define PORT 54000
-#define MAX_BUFFER_SIZE (49152)
+//#define PORT 54000
+//#define MAX_BUFFER_SIZE (49152)
 
-class TCPListener;
-typedef void(*MessageRecievedHandler)(TCPListener* listener, int socketID, std::string msg);
+//class TCPListener;
+//typedef void(*MessageRecievedHandler)(TCPListener* listener, int socketID, std::string msg);
+//class Network1;
+//typedef void(Network1::*ConnectionRecievedHandler)(SOCKET*);
 
 class TCPListener
 {
 public:
-	TCPListener(std::string ipAddress, int port, MessageRecievedHandler handler);
+	TCPListener();
+	TCPListener(std::string ipAddress, int port, std::function<void(SOCKET*)> handler);
 	~TCPListener();
 
 	bool Init();
@@ -38,13 +44,14 @@ private:
 
 	std::string ipAddress_;
 	int port_;
-	MessageRecievedHandler MessageRecieved;
+
+	//ConnectionRecievedHandler connectionRecieved;
+	std::function<void(SOCKET*)> connectionRecieved;
 
 	fd_set readfds_;
 	fd_set writefds_;
 	fd_set exceptfds_;
 
-	std::vector<TCPSocket> connections_;
-
+	//std::vector<TCPSocket> connections_;
 };
 

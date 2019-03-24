@@ -9,6 +9,8 @@
 #include <Ws2tcpip.h>
 #include <stdio.h>
 
+#include "TestPacket.h"
+
 #pragma comment (lib, "ws2_32.lib")
 
 #include <Box2D\Box2D.h>
@@ -23,7 +25,6 @@
 
 int main() {
 	std::cout << "Hello World" << std::endl;
-
 
 	std::string ipAddress = "127.0.0.1";
 	int port = PORT;
@@ -81,19 +82,23 @@ int main() {
 
 		if (userInput.size() > 0)
 		{
-			// Send the text
-			if (send(clientSocket, userInput.c_str(), userInput.size() + 1, 0) == SOCKET_ERROR);
-			{
-				// Wait for response
-				ZeroMemory(buf, SOCKET_BUFFER_SIZE);
-				int bytesReceived = recv(clientSocket, buf, 4096, 0);
+			std::string msg("::position::testtemp");
+			TestPacket* testPacket = new TestPacket(msg);
+			send(clientSocket, testPacket->buffer_, testPacket->bufferSize_, 0);
 
-				if (bytesReceived > 0)
-				{
-					// Echo response to console
-					std::cout << std::string(buf, 0, bytesReceived) << std::endl;
-				}
-			}
+			// Send the text
+			//if (send(clientSocket, userInput.c_str(), userInput.size() + 1, 0) == SOCKET_ERROR);
+			//{
+			//	// Wait for response
+			//	ZeroMemory(buf, SOCKET_BUFFER_SIZE);
+			//	int bytesReceived = recv(clientSocket, buf, 4096, 0);
+
+			//	if (bytesReceived > 0)
+			//	{
+			//		// Echo response to console
+			//		std::cout << std::string(buf, 0, bytesReceived) << std::endl;
+			//	}
+			//}
 		}
 	}
 
