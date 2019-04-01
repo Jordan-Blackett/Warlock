@@ -2,7 +2,7 @@
 
 
 
-Warlock::Warlock()
+Warlock::Warlock(MessagingSystem* messageBus) : BusNode(messageBus)
 {
 }
 
@@ -59,10 +59,32 @@ void Warlock::Run()
 		//	accumulator -= dt;
 		//}
 
+		//notify();
 
 		// Render
 		window_->clear();
 		//ScreenManager::GetInstance()->Render();
 		window_->display();
 	}
+}
+
+void Warlock::BufferToInputPacket()
+{
+	InputPacket newInputPacket;
+
+	//newInputPacket.left = 
+	//memcpy(buffer_ + bufferOffset_, &data.input.left, sizeof(uint8_t));
+	//bufferOffset_ += sizeof(uint8_t);
+	//memcpy(buffer_ + bufferOffset_, &data.input.right, sizeof(uint8_t));
+	//bufferOffset_ += sizeof(uint8_t);
+	//memcpy(buffer_ + bufferOffset_, &data.input.up, sizeof(uint8_t));
+	//bufferOffset_ += sizeof(uint8_t);
+	//memcpy(buffer_ + bufferOffset_, &data.input.down, sizeof(uint8_t));
+	//bufferOffset_ += sizeof(uint8_t);
+	//memcpy(buffer_ + bufferOffset_, &data.input.space, sizeof(uint8_t));
+	//bufferOffset_ += sizeof(uint8_t);
+	//memcpy(buffer_ + bufferOffset_, &data.input.leftclick, sizeof(uint8_t));
+	//bufferOffset_ += sizeof(uint8_t);
+	//memcpy(buffer_ + bufferOffset_, &data.input.rightclick, sizeof(uint8_t));
+	//bufferOffset_ += sizeof(uint8_t);
 }

@@ -2,7 +2,7 @@
 
 
 
-Network1::Network1()
+Network1::Network1(MessagingSystem* messageBus) : BusNode(messageBus)
 {
 }
 
@@ -26,24 +26,31 @@ bool Network1::Init()
 		return false;
 	}
 
-	// Create a listener socket and make it wait for new connections on port 54000
-	//TCPListener listener("127.0.0.1", PORT, &Network1::Listener_ConnectionReceived);
-	//TCPListener listener2("127.0.0.1", PORT, std::bind(&Network1::Listener_ConnectionReceived, this, _1));
-	listener = new TCPListener("127.0.0.1", PORT, std::bind(&Network1::Listener_ConnectionReceived, this, _1));
-	//listener = listener2;
-	if (listener->Init())
-	{
-		listener->listen();
-	}
+	listenerThread_ = std::thread(&Network1::InitListener, this);
 
 	return true;
+}
+
+void Network1::InitListener()
+{
+	// Create a listener socket and make it wait for new connections
+	using namespace std::placeholders;
+	TCPListener listener("127.0.0.1", PORT, std::bind(&Network1::Listener_ConnectionReceived, this, _1));
+	listener.Init();
+	listener.listen();
 }
 
 void Network1::run()
 {
 	while (true)
 	{
-		listener->listen();
+		// Message System
+		Notify();
+
+		if (connections_.size() == 0)
+		{
+			continue;
+		}
 
 		FD_ZERO(&readfds_);
 		//FD_ZERO(&writefds_);
@@ -65,7 +72,7 @@ void Network1::run()
 		{
 			if (FD_ISSET(connections_[i].socket_, &exceptfds_))
 			{
-				//PrintExceptionalCondition(listeningSocket);
+				PrintExceptionalCondition(connections_[i].socket_);
 				std::cout << "Winsock error occurred on client:" << connections_[i].socket_ << ". Disconnecting client." << std::endl;
 				closesocket(connections_[i].socket_);
 				connections_.erase(connections_.begin() + i);
@@ -75,46 +82,35 @@ void Network1::run()
 
 			if (FD_ISSET(connections_[i].socket_, &readfds_))
 			{
-				// MessageLength (16-bits), MessageType (8-bits) and MessageSubType (8-bits)
 				ZeroMemory(buf, MAX_BUFFER_SIZE);
-
 
 				int bytesReceived = recv(connections_[i].socket_, buf, connections_[i].incomingPacketLength - connections_[i].bytesReceived, 0);
 				if (bytesReceived > 0)
 				{
-					std::cout << "Message: '" << std::string(buf, 0, bytesReceived) << "'" << std::endl;
 					if (connections_[i].incomingPacketLength == 2)
 					{
-						uint16_t u16;
-						memcpy(&u16, buf, 2);
-						u16 = htons(u16);
-						connections_[i].incomingPacketLength = u16; // value of first 16 bytes
-						std::cout << "Length: " << connections_[i].incomingPacketLength << std::endl;
+						// Get packet length value of first 2 bytes
+						uint16_t packetLength;
+						memcpy(&packetLength, buf, 2);
+						packetLength = htons(packetLength);
+						connections_[i].incomingPacketLength = packetLength;
 					}
 
 					memcpy(connections_[i].buffer + connections_[i].bytesReceived, buf, bytesReceived);
-					//std::cout << "memcpy " << std::string(connections_[i].buffer, 0, connections_[i].bytesReceived) << " + " << std::string(buf, 0, bytesReceived) << std::endl;
 
 					connections_[i].bytesReceived += bytesReceived;
-					//std::cout << "LEFT: " << connections_[i].incomingPacketLength - connections_[i].bytesReceived << std::endl;
 					if (connections_[i].bytesReceived >= connections_[i].incomingPacketLength)
 					{
 						int headerSize = 6;
+
+						// Client ID - Swap packet length to client ID
 						uint16_t u16;
 						u16 = connections_[i].socket_;
-						std::cout << "Debug Length: " << connections_[i].bytesReceived << std::endl;
-						memcpy(connections_[i].buffer, &u16, 2);
+						memcpy(connections_[i].buffer, &u16, sizeof(uint16_t));
 
-						memcpy(&u16, connections_[i].buffer + 2, 2);
-						u16 = htons(u16);
-						std::cout << "Type: " << u16 << std::endl;
-
-						memcpy(&u16, connections_[i].buffer + 4, 2);
-						u16 = htons(u16);
-						std::cout << "Sub Type: " << u16 << std::endl;
-
-						std::cout << "Message: '" << std::string(connections_[i].buffer + headerSize, 0, connections_[i].incomingPacketLength - headerSize) << "'" << std::endl;
-						//MessageRecieved(this, connections_[i].socket_, std::string(connections_[i].buffer, 0, connections_[i].incomingPacketLength));
+						// Send packet to messaging system
+						Message packet(std::string(connections_[i].buffer, 0, connections_[i].incomingPacketLength));
+						SendMessageSystem(packet);
 
 						connections_[i].bytesReceived = 0;
 						connections_[i].incomingPacketLength = 2; // 2 = Packet length size (bytes)
@@ -135,10 +131,38 @@ void Network1::run()
 			}
 		}
 	}
-	//CleanUp();
+	CleanUp();
+}
+
+void Network1::CleanUp()
+{
+	for (int i = 0; i < connections_.size(); i++)
+	{
+		closesocket(connections_[i].socket_);
+		connections_.erase(connections_.begin() + i);
+	}
 }
 
 void Network1::Listener_ConnectionReceived(SOCKET* socket)
 {
 	connections_.push_back(*socket);
+}
+
+void Network1::Send(int clientSocket, std::string msg)
+{
+	send(clientSocket, msg.c_str(), msg.size() + 1, 0);
+}
+
+void Network1::PrintExceptionalCondition(SOCKET socket)
+{
+	int errorCode = 0;
+	int errorCodeSize = sizeof(errorCode);
+	if (getsockopt(socket, SOL_SOCKET, SO_ERROR, (char*)&errorCode, &errorCodeSize) == 0)
+	{
+		std::cout << "Winsock error: " << errorCode << "." << std::endl;
+	}
+	else
+	{
+		std::cout << "Winsock error occurred. getsockopt() failed." << std::endl;
+	}
 }

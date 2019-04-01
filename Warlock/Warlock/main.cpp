@@ -83,7 +83,13 @@ int main() {
 		if (userInput.size() > 0)
 		{
 			std::string msg("::position::testtemp");
-			TestPacket* testPacket = new TestPacket(msg);
+
+			PacketData data;
+			InputPacket2 input;
+			input.up = true;
+			data.input = input;
+			TestPacket* testPacket = new TestPacket(data);
+
 			send(clientSocket, testPacket->buffer_, testPacket->bufferSize_, 0);
 
 			// Send the text

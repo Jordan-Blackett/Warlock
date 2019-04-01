@@ -10,19 +10,20 @@
 #include "TCPSocket.h"
 #include <functional>
 
+#include "BusNode.h"
+#include <thread>
+
 #define PORT 54000
-#define MAX_BUFFER_SIZE (49152)
+#define MAX_BUFFER_SIZE (25) //49152
 
-//void Listener_MessageReceived(TCPListener* listener, int client, std::string msg);
-//void Listener_ConnectionReceived(SOCKET* socket);
-
-class Network1
+class Network1 : public BusNode
 {
 public:
-	Network1();
+	Network1(MessagingSystem* messageBus);
 	~Network1();
 
 	bool Init();
+	void InitListener();
 
 	void run();
 
@@ -32,22 +33,17 @@ public:
 
 	void Send(int clientSocket, std::string msg);
 
-	// 
-
-
 private:
-	//std::string ipAddress_;
-	//int port_;
-	//ConnectionRecievedHandler MessageRecieved;
-
+	void PrintExceptionalCondition(SOCKET socket);
 
 	fd_set readfds_;
 	fd_set writefds_;
 	fd_set exceptfds_;
 
+	std::thread listenerThread_;
+
 	std::vector<TCPSocket> connections_;
 
-	//TCPListener listener = TCPListener("127.0.0.1", PORT, std::bind(&Network1::Listener_ConnectionReceived, this, _1));
-	TCPListener* listener;
+	void onNotify(Message message) {}
 };
 

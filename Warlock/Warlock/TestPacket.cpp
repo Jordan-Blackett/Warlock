@@ -2,24 +2,23 @@
 
 
 
-TestPacket::TestPacket(std::string message)
+TestPacket::TestPacket(const PacketData& data)
 {
 	PacketHeader* packetHeader = new PacketHeader();
-	packetHeader->msgLength = 6 + message.size();
-	packetHeader->msgType = 40;
-	packetHeader->msgSubType = 75;
+	packetHeader->msgType = 00;
+	packetHeader->msgSubType = 00;
 
-	std::cout << "Debug Length: " << packetHeader->msgLength << std::endl;
-	std::cout << "Debug Header Length: " << 6 << std::endl;
-	std::cout << "Debug Message Length: " << message.size() << std::endl;
-	std::cout << "Debug Message: " << message << std::endl;
+	htonHeaderData(*packetHeader, data);
 
-	//PacketData* packetData = new PacketData();
-	//htonHeaderData(*packetHeader, *packetData, buffer_);
-	htonHeader(*packetHeader);
-	strcpy_s(buffer_ + 6, packetHeader->msgLength, message.c_str());
+	//packetHeader->msgLength = bufferOffset_;
 
-	bufferSize_ = packetHeader->msgLength;
+	//std::cout << "Debug Length: " << packetHeader->msgLength << std::endl;
+	//std::cout << "Debug Header Length: " << 6 << std::endl;
+	//std::cout << "Debug Message Length: " << message.size() << std::endl;
+	//std::cout << "Debug Message: " << message << std::endl;
+	//strcpy_s(buffer_ + 6, packetHeader->msgLength, message.c_str());
+
+	bufferSize_ = bufferOffset_;
 }
 
 
@@ -30,31 +29,51 @@ TestPacket::~TestPacket()
 void TestPacket::htonHeaderData(const PacketHeader& header, const PacketData& data)
 {
 	htonHeader(header);
-	//htonData(data);
+	//devider
+	htonData(data);
+
+	// Packet size
+	uint16_t u16;
+	u16 = htons(bufferOffset_);
+	memcpy(buffer_, &u16, sizeof(uint16_t));
 }
 
 void TestPacket::htonHeader(const PacketHeader& header)
 {
 	uint16_t u16;
-	uint16_t bufferOffset = 0;
-	u16 = htons(header.msgLength);
-	memcpy(buffer_ + bufferOffset, &u16, sizeof(uint16_t));
-	bufferOffset += sizeof(uint16_t);
+	//u16 = htons(header.msgLength);
+	//memcpy(buffer_ + bufferOffset_, &u16, sizeof(uint16_t));
+	//bufferOffset_ += sizeof(uint16_t);
 	u16 = htons(header.msgType);
-	memcpy(buffer_ + bufferOffset, &u16, sizeof(uint16_t));
-	bufferOffset += sizeof(uint16_t);
+	memcpy(buffer_ + bufferOffset_, &u16, sizeof(uint16_t));
+	bufferOffset_ += sizeof(uint16_t);
 	u16 = htons(header.msgSubType);
-	memcpy(buffer_ + bufferOffset, &u16, sizeof(uint16_t));
+	memcpy(buffer_ + bufferOffset_, &u16, sizeof(uint16_t));
+	bufferOffset_ += sizeof(uint16_t);
 }
 
 void TestPacket::htonData(const PacketData& data)
 {
-	//uint16_t u16;
-	//uint32_t u32;
-	//u16 = htons(data.pf1);
-	//memcpy(buffer + 0, &u16, 2);
-	//u32 = htonl(data.pf2 >> 32);
-	//memcpy(buffer + 2, &u32, 4);
-	//u32 = htonl(data.pf2);
-	//memcpy(buffer + 6, &u32, 4);
+	//switch
+	//{}
+	memcpy(buffer_ + bufferOffset_, &data.input.left, sizeof(uint8_t));
+	bufferOffset_ += sizeof(uint8_t);
+	memcpy(buffer_ + bufferOffset_, &data.input.right, sizeof(uint8_t));
+	bufferOffset_ += sizeof(uint8_t);
+	memcpy(buffer_ + bufferOffset_, &data.input.up, sizeof(uint8_t));
+	bufferOffset_ += sizeof(uint8_t);
+	memcpy(buffer_ + bufferOffset_, &data.input.down, sizeof(uint8_t));
+	bufferOffset_ += sizeof(uint8_t);
+	memcpy(buffer_ + bufferOffset_, &data.input.space, sizeof(uint8_t));
+	bufferOffset_ += sizeof(uint8_t);
+	memcpy(buffer_ + bufferOffset_, &data.input.leftclick, sizeof(uint8_t));
+	bufferOffset_ += sizeof(uint8_t);
+	memcpy(buffer_ + bufferOffset_, &data.input.rightclick, sizeof(uint8_t));
+	bufferOffset_ += sizeof(uint8_t);
 }
+
+//{
+//	std::string devider = "::";
+//	strcpy_s(buffer_ + bufferOffset_, devider.size(), devider.c_str());
+//	bufferOffset_ += devider.size();
+//}
