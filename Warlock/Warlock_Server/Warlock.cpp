@@ -16,9 +16,16 @@ bool Warlock::Init()
 	window_ = new sf::RenderWindow(sf::VideoMode(ScreenWidth, ScreenHeight, 32), "Warlock Server!");
 
 	// Prepare the world
-	//InitPhysicalWorld();
+	InitPhysicalWorld();
 
 	return true;
+}
+
+void Warlock::InitPhysicalWorld()
+{
+	world = new b2World(b2Vec2(horizontalGravity, verticalGravity));
+	world->SetAllowSleeping(true);
+	world->SetContinuousPhysics(true);
 }
 
 void Warlock::Run()
@@ -34,38 +41,47 @@ void Warlock::Run()
 
 		// ---Game Loop---
 		// Timestep - DeltaTime
-		//double newTime = simulationClock_.getElapsedTime().asSeconds();
-		//double frameTime = newTime - simulationTimeLastUpdated_;
-		//simulationTimeLastUpdated_ = newTime;
+		double newTime = simulationClock_.getElapsedTime().asSeconds();
+		double frameTime = newTime - simulationTimeLastUpdated_;
+		simulationTimeLastUpdated_ = newTime;
 
-		//if (frameTime > 0.25f)
-		//	frameTime = 0.25f; // Avoid "Spiral of death"
+		if (frameTime > 0.25f)
+			frameTime = 0.25f; // Avoid "Spiral of death"
 
-		//accumulator += frameTime;
+		accumulator += frameTime;
 
-		//while (accumulator >= dt)
-		//{
+		while (accumulator >= dt)
+		{
 
 		// Init new players - while in lobby mode
 
-		// Input buffer
-		//	player->movePlayer();
+		 //Input buffer
+			//player->movePlayer();
 
-		// Run Simulation
-		//world->Step(1 / 60.0f, 8, 3);
+		 //Run Simulation
+		world->Step(1 / 60.0f, 8, 3);
 
 		// Send snapshot
 
-		//	accumulator -= dt;
-		//}
-
-		//notify();
+			accumulator -= dt;
+		}
 
 		// Render
 		window_->clear();
-		//ScreenManager::GetInstance()->Render();
+
+		for (auto it = clientEntities.begin(); it != clientEntities.end(); ++it)
+		{
+			it->second->Render(*window_);
+		}
 		window_->display();
 	}
+}
+
+void Warlock::CreateNewPlayer(unsigned int ClientID)
+{
+	Server_Player* box = new Server_Player();
+	box->init(world, sf::Vector2i(100, 100), boxSize, scale);
+	clientEntities.insert(std::pair<unsigned int, Server_Player*>(ClientID, box));
 }
 
 void Warlock::BufferToInputPacket()

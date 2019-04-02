@@ -109,7 +109,7 @@ void Network1::run()
 						memcpy(connections_[i].buffer, &u16, sizeof(uint16_t));
 
 						// Send packet to messaging system
-						Message packet(std::string(connections_[i].buffer, 0, connections_[i].incomingPacketLength));
+						Message packet(std::string(connections_[i].buffer, connections_[i].incomingPacketLength));
 						SendMessageSystem(packet);
 
 						connections_[i].bytesReceived = 0;
@@ -130,6 +130,8 @@ void Network1::run()
 				}
 			}
 		}
+		// Message System
+		Notify();
 	}
 	CleanUp();
 }
@@ -146,6 +148,26 @@ void Network1::CleanUp()
 void Network1::Listener_ConnectionReceived(SOCKET* socket)
 {
 	connections_.push_back(*socket);
+
+	// Send new connection
+	//CreatePacket(clientid, type, sub, message);
+	char packetBuffer[128];
+
+	// Header
+	uint16_t clientID = *socket;
+	memcpy(packetBuffer, &clientID, sizeof(uint16_t));
+	uint16_t packetType = 0;
+	memcpy(packetBuffer + 2, &packetType, sizeof(uint16_t));
+	uint16_t packetSubType = 0;
+	memcpy(packetBuffer + 4, &packetSubType, sizeof(uint16_t));
+
+	// Message
+	//std::string message = "New_Connection";
+	//strcpy_s(packetBuffer + 6, sizeof(packetBuffer), message.c_str());
+
+	Message packet(std::string(packetBuffer, 6));
+	SendMessageSystem(packet);
+	Notify();
 }
 
 void Network1::Send(int clientSocket, std::string msg)

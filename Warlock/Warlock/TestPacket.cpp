@@ -5,8 +5,8 @@
 TestPacket::TestPacket(const PacketData& data)
 {
 	PacketHeader* packetHeader = new PacketHeader();
-	packetHeader->msgType = 00;
-	packetHeader->msgSubType = 00;
+	packetHeader->msgType = 1;
+	packetHeader->msgSubType = 0;
 
 	htonHeaderData(*packetHeader, data);
 
