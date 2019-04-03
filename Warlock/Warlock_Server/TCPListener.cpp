@@ -15,17 +15,6 @@ TCPListener::~TCPListener()
 
 bool TCPListener::Init()
 {
-	// Initialze winsock
-	WSADATA winsockData;
-	WORD winsockVersion = MAKEWORD(2, 2); //0x202;
-
-	if (WSAStartup(winsockVersion, &winsockData))
-	{
-		std::cout << "WSAStartup failed: " << WSAGetLastError() << std::endl;
-		system("pause");
-		return false;
-	}
-
 	listeningSocket = CreateListenSocket();
 	if (listeningSocket == INVALID_SOCKET)
 	{

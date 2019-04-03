@@ -18,7 +18,6 @@ bool Network1::Init()
 	// Initialze winsock
 	WSADATA winsockData;
 	WORD winsockVersion = MAKEWORD(2, 2); //0x202;
-
 	if (WSAStartup(winsockVersion, &winsockData))
 	{
 		std::cout << "WSAStartup failed: " << WSAGetLastError() << std::endl;
@@ -26,7 +25,9 @@ bool Network1::Init()
 		return false;
 	}
 
-	listenerThread_ = std::thread(&Network1::InitListener, this);
+	//BusNode::getNotifyFunc();
+	TCPlistenerThread_ = std::thread(&Network1::InitListener, this);
+	UDPReceiveThread_ = std::thread(&Network1::InitUDP, this);
 
 	return true;
 }
@@ -35,9 +36,28 @@ void Network1::InitListener()
 {
 	// Create a listener socket and make it wait for new connections
 	using namespace std::placeholders;
-	TCPListener listener("127.0.0.1", PORT, std::bind(&Network1::Listener_ConnectionReceived, this, _1));
-	listener.Init();
-	listener.listen();
+	TCPListener listener("127.0.0.1", TCP_PORT, std::bind(&Network1::Listener_ConnectionReceived, this, _1));
+	if (listener.Init())
+	{
+		listener.listen();
+	}
+	// else error return -1 break etc etc
+}
+
+void Network1::InitUDP()
+{
+	using namespace std::placeholders;
+	UDPNetwork UDP(UDP_PORT, std::bind(&Network1::SendToMessageSystem, this, _1));
+	if (UDP.Init())
+	{
+		UDP.Run();
+	}
+}
+
+void Network1::SendToMessageSystem(const std::string * msg)
+{
+	Message packet(*msg);
+	SendMessageSystem(packet);
 }
 
 void Network1::run()

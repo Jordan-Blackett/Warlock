@@ -40,33 +40,48 @@ int main() {
 		return 1;
 	}
 
-	// Create a socket - TCP
-	int addressFamily = AF_INET;
-	int type = SOCK_STREAM; // TCP
-	int protocol = IPPROTO_TCP;
+	//// Create a socket - TCP
+	//int addressFamily = AF_INET;
+	//int type = SOCK_STREAM; // TCP
+	//int protocol = IPPROTO_TCP;
 
-	SOCKET clientSocket = socket(addressFamily, type, protocol);
-	if (clientSocket == INVALID_SOCKET)
+	//SOCKET clientSocket = socket(addressFamily, type, protocol);
+	//if (clientSocket == INVALID_SOCKET)
+	//{
+	//	printf("socket failed: %d", WSAGetLastError());
+	//	WSACleanup();
+	//	return 1;
+	//}
+
+	//// Fill in a hint structure
+	//sockaddr_in hint;
+	//hint.sin_family = AF_INET;
+	//hint.sin_port = htons(PORT);
+	//inet_pton(AF_INET, ipAddress.c_str(), &hint.sin_addr);
+
+	// Connect to server
+	//if (connect(clientSocket, (sockaddr*)&hint, sizeof(hint)) == SOCKET_ERROR)
+	//{
+	//	printf("Failed to connect to the server: %d", WSAGetLastError());
+	//	closesocket(clientSocket);
+	//	WSACleanup();
+	//	return 1;
+	//}
+
+	// Create a hint structure for the server
+	sockaddr_in server;
+	server.sin_family = AF_INET; // AF_INET = IPv4 addresses
+	server.sin_port = htons(52000); // Little to big endian conversion
+	inet_pton(AF_INET, "127.0.0.1", &server.sin_addr); // Convert from string to byte array
+
+	SOCKET UDPclientSocket = socket(AF_INET, SOCK_DGRAM, 0);
+	if (UDPclientSocket == INVALID_SOCKET)
 	{
 		printf("socket failed: %d", WSAGetLastError());
 		WSACleanup();
 		return 1;
 	}
 
-	// Fill in a hint structure
-	sockaddr_in hint;
-	hint.sin_family = AF_INET;
-	hint.sin_port = htons(PORT);
-	inet_pton(AF_INET, ipAddress.c_str(), &hint.sin_addr);
-
-	// Connect to server
-	if (connect(clientSocket, (sockaddr*)&hint, sizeof(hint)) == SOCKET_ERROR)
-	{
-		printf("Failed to connect to the server: %d", WSAGetLastError());
-		closesocket(clientSocket);
-		WSACleanup();
-		return 1;
-	}
 
 	printf("Connected to the server\n");
 
@@ -90,7 +105,12 @@ int main() {
 			data.input = input;
 			TestPacket* testPacket = new TestPacket(data);
 
-			send(clientSocket, testPacket->buffer_, testPacket->bufferSize_, 0);
+			//send(clientSocket, testPacket->buffer_, testPacket->bufferSize_, 0);
+
+			// Write out to that socket
+			//string s(argv[1]);
+			int sendOk = sendto(UDPclientSocket, testPacket->buffer_, testPacket->bufferSize_, 0, (sockaddr*)&server, sizeof(server));
+
 
 			// Send the text
 			//if (send(clientSocket, userInput.c_str(), userInput.size() + 1, 0) == SOCKET_ERROR);
@@ -109,7 +129,7 @@ int main() {
 	}
 
 	// Cleanup winsock
-	closesocket(clientSocket);
+	//closesocket(clientSocket);
 	WSACleanup();
 	printf("Cleanup\n");
 

@@ -8,12 +8,14 @@
 
 #include "TCPListener.h"
 #include "TCPSocket.h"
+#include "UDPNetwork.h"
 #include <functional>
 
 #include "BusNode.h"
 #include <thread>
 
-#define PORT 54000
+#define TCP_PORT 54000
+#define UDP_PORT 52000
 #define MAX_BUFFER_SIZE (25) //49152
 
 class Network1 : public BusNode
@@ -24,6 +26,9 @@ public:
 
 	bool Init();
 	void InitListener();
+	void InitUDP();
+
+	void SendToMessageSystem(const std::string* msg);
 
 	void run();
 
@@ -40,7 +45,8 @@ private:
 	fd_set writefds_;
 	fd_set exceptfds_;
 
-	std::thread listenerThread_;
+	std::thread TCPlistenerThread_;
+	std::thread UDPReceiveThread_;
 
 	std::vector<TCPSocket> connections_;
 
