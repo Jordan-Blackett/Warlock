@@ -7,7 +7,7 @@
 
 // MessageLength (16-bits), MessageType (8-bits) and MessageSubType (8-bits)
 struct PacketHeader {
-	//uint16_t msgLength;
+	uint16_t msgClientID;
 	uint16_t msgType;
 	uint16_t msgSubType;
 };

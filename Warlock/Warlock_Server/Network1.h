@@ -13,6 +13,7 @@
 
 #include "BusNode.h"
 #include <thread>
+#include <map>
 
 #define TCP_PORT 54000
 #define UDP_PORT 52000
@@ -28,6 +29,7 @@ public:
 	void InitListener();
 	void InitUDP();
 
+	std::string CreatePacket(uint16_t clientid, uint16_t type, uint16_t sub, std::string message);
 	void SendToMessageSystem(const std::string* msg);
 
 	void run();
@@ -35,7 +37,7 @@ public:
 	void CleanUp();
 
 	void Listener_ConnectionReceived(SOCKET* socket);
-
+	
 	void Send(int clientSocket, std::string msg);
 
 private:
@@ -48,7 +50,8 @@ private:
 	std::thread TCPlistenerThread_;
 	std::thread UDPReceiveThread_;
 
-	std::vector<TCPSocket> connections_;
+	std::map<u_int64, TCPSocket> connections_;
+	//std::vector<TCPSocket> connections_;
 
 	void onNotify(Message message) {}
 };

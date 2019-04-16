@@ -20,11 +20,11 @@ int main() {
 	std::cout << "Hello World Server" << std::endl;
 
 	MessagingSystem messageBus;
-	std::thread game(run, &messageBus);
 	
 	Network1 server(&messageBus);
 	if (server.Init())
 	{
+		std::thread game(run, &messageBus);
 		server.run();
 	}
 

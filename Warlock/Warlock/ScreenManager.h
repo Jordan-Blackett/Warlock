@@ -4,13 +4,15 @@
 
 #include "GameScreen.h"
 
-class ScreenManager
+#include "Client_BusNode.h"
+
+class ScreenManager : public Client_BusNode
 {
 public:
 	~ScreenManager();
 	static ScreenManager* GetInstance();
 
-	void Initialize(sf::RenderWindow* Window);
+	void Initialize(Client_MessagingSystem* messageBus, sf::RenderWindow* Window);
 	void Update();
 	void Render();
 
@@ -19,8 +21,9 @@ private:
 	ScreenManager(ScreenManager const&) {};
 	ScreenManager& operator=(ScreenManager const&) {};
 
+	void onNotify(Message message);
+
 	static ScreenManager* instance;
 	Screen *currentScreen;
-
 };
 

@@ -29,6 +29,7 @@ bool UDPNetwork::Init()
 		return false;
 	}
 
+	//std::cout << "UDP Successful." << std::endl;
 	return true;
 }
 
@@ -62,7 +63,7 @@ void UDPNetwork::Run() //UDP recv
 		SendMessageSystem(&test);
 
 		// Display the message / who sent it
-		std::cout << "Message recv from " << clientIP << " : " << buffer << std::endl;
+		//std::cout << "Message recv from " << clientIP << " : " << buffer << std::endl;
 	}
 
 	closesocket(UDPSocket_);

@@ -74,39 +74,39 @@ private:
 		// Client ID
 		memcpy(&ClientID, message.getMessage().c_str() + bufferOffset, sizeof(uint16_t));
 		bufferOffset += sizeof(uint16_t);
-		std::cout << "Client ID: " << ClientID << std::endl;
+		//std::cout << "Client ID: " << ClientID << std::endl;
 
 		// Type/ Sub-Type
 		memcpy(&packetType, message.getMessage().c_str() + bufferOffset, sizeof(uint16_t));
 		packetType = ntohs(packetType);
 		bufferOffset += sizeof(uint16_t);
-		std::cout << "Type: " << packetType << std::endl;
+		//std::cout << "Type: " << packetType << std::endl;
 		memcpy(&packetSubType, message.getMessage().c_str() + bufferOffset, sizeof(uint16_t));
 		packetSubType = ntohs(packetSubType);
 		bufferOffset += sizeof(uint16_t);
-		std::cout << "Sub-Type: " << packetSubType << std::endl;
+		//std::cout << "Sub-Type: " << packetSubType << std::endl;
 
-		//switch(packetType)
-		//{
-		//	// New_Connection
-		//	case 0:
-		//		std::cout << "New Client ID: " << ClientID << std::endl;
-		//		CreateNewPlayer(ClientID);
-		//	break;
-		//	// Input Packet
-		//	case 1:
-		//		// TO FUNCTION
-		//		InputPacket newInputPacket;
-		//		newInputPacket.left = (uint8_t)message.getMessage().c_str() + ++bufferOffset;
-		//		newInputPacket.right = (uint8_t)message.getMessage().c_str() + ++bufferOffset;
-		//		newInputPacket.up = (uint8_t)message.getMessage().c_str() + ++bufferOffset;
-		//		newInputPacket.down = (uint8_t)message.getMessage().c_str() + ++bufferOffset;
-		//		
-		//		clientEntities[ClientID]->MoveEntity(&newInputPacket);
+		switch(packetType)
+		{
+			// New_Connection
+			case 0:
+				std::cout << "New Client ID: " << ClientID << std::endl;
+				CreateNewPlayer(ClientID);
+			break;
+			// Input Packet
+			case 1:
+				// TO FUNCTION
+				InputPacket newInputPacket;
+				newInputPacket.left = (uint8_t)message.getMessage().c_str() + ++bufferOffset;
+				newInputPacket.right = (uint8_t)message.getMessage().c_str() + ++bufferOffset;
+				newInputPacket.up = (uint8_t)message.getMessage().c_str() + ++bufferOffset;
+				newInputPacket.down = (uint8_t)message.getMessage().c_str() + ++bufferOffset;
+				
+				clientEntities[ClientID]->MoveEntity(&newInputPacket);
 
-		//		//	Add to input buffer
-		//	break;
-		//}
+				//	Add to input buffer
+			break;
+		}
 	}
 };
 

@@ -7,6 +7,7 @@
 class TCPSocket
 {
 public:
+	TCPSocket() {};
 	TCPSocket(SOCKET socket);
 	~TCPSocket();
 

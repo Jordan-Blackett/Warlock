@@ -26,6 +26,7 @@ bool TCPListener::Init()
 	FD_ZERO(&readfds_);
 	FD_ZERO(&exceptfds_);
 
+	//std::cout << "TCP Listener Successful." << std::endl;
 	return true;
 }
 

@@ -13,8 +13,6 @@ Network1::~Network1()
 
 bool Network1::Init()
 {
-	using namespace std::placeholders;
-
 	// Initialze winsock
 	WSADATA winsockData;
 	WORD winsockVersion = MAKEWORD(2, 2); //0x202;
@@ -25,7 +23,6 @@ bool Network1::Init()
 		return false;
 	}
 
-	//BusNode::getNotifyFunc();
 	TCPlistenerThread_ = std::thread(&Network1::InitListener, this);
 	UDPReceiveThread_ = std::thread(&Network1::InitUDP, this);
 
@@ -54,6 +51,24 @@ void Network1::InitUDP()
 	}
 }
 
+std::string Network1::CreatePacket(uint16_t clientID, uint16_t packetType, uint16_t packetSubType, std::string message)
+{
+	char packetBuffer[128];
+
+	// Header
+	memcpy(packetBuffer, &clientID, sizeof(uint16_t));
+	memcpy(packetBuffer + 2, &packetType, sizeof(uint16_t));
+	memcpy(packetBuffer + 4, &packetSubType, sizeof(uint16_t));
+
+	// Message
+	if (message != "")
+	{
+		strcpy_s(packetBuffer + 6, sizeof(packetBuffer), message.c_str());
+	}
+
+	return std::string(packetBuffer, 6);
+}
+
 void Network1::SendToMessageSystem(const std::string * msg)
 {
 	Message packet(*msg);
@@ -77,74 +92,71 @@ void Network1::run()
 		FD_ZERO(&exceptfds_);
 
 		// Recieve
-		for (int i = 0; i < connections_.size(); i++)
+		for (auto const& conn : connections_)
 		{
-			FD_SET(connections_[i].socket_, &readfds_);
-			//FD_SET(connections_[i].socket_, &writefds_);
-			FD_SET(connections_[i].socket_, &exceptfds_);
+			FD_SET(conn.second.socket_, &readfds_);
+			FD_SET(conn.second.socket_, &exceptfds_);
 		}
 
 		select(0, &readfds_, &writefds_, &exceptfds_, NULL);
 
 		char buf[MAX_BUFFER_SIZE];
 
-		for (int i = 0; i < connections_.size(); i++)
+		for (auto& conn : connections_)
 		{
-			if (FD_ISSET(connections_[i].socket_, &exceptfds_))
+			if (FD_ISSET(conn.second.socket_, &exceptfds_))
 			{
-				PrintExceptionalCondition(connections_[i].socket_);
-				std::cout << "Winsock error occurred on client:" << connections_[i].socket_ << ". Disconnecting client." << std::endl;
-				closesocket(connections_[i].socket_);
-				connections_.erase(connections_.begin() + i);
-				i -= 1;
+				PrintExceptionalCondition(conn.second.socket_);
+				std::cout << "Winsock error occurred on client:" << conn.second.socket_ << ". Disconnecting client." << std::endl;
+				closesocket(conn.second.socket_);
+				connections_.erase(conn.first);
 				continue;
 			}
 
-			if (FD_ISSET(connections_[i].socket_, &readfds_))
+			if (FD_ISSET(conn.second.socket_, &readfds_))
 			{
 				ZeroMemory(buf, MAX_BUFFER_SIZE);
 
-				int bytesReceived = recv(connections_[i].socket_, buf, connections_[i].incomingPacketLength - connections_[i].bytesReceived, 0);
+				int bytesReceived = recv(conn.second.socket_, buf, conn.second.incomingPacketLength - conn.second.bytesReceived, 0);
 				if (bytesReceived > 0)
 				{
-					if (connections_[i].incomingPacketLength == 2)
+					if (conn.second.incomingPacketLength == 2)
 					{
 						// Get packet length value of first 2 bytes
 						uint16_t packetLength;
 						memcpy(&packetLength, buf, 2);
 						packetLength = htons(packetLength);
-						connections_[i].incomingPacketLength = packetLength;
+						conn.second.incomingPacketLength = packetLength;
 					}
 
-					memcpy(connections_[i].buffer + connections_[i].bytesReceived, buf, bytesReceived);
+					memcpy(conn.second.buffer + conn.second.bytesReceived, buf, bytesReceived);
 
-					connections_[i].bytesReceived += bytesReceived;
-					if (connections_[i].bytesReceived >= connections_[i].incomingPacketLength)
+					conn.second.bytesReceived += bytesReceived;
+					if (conn.second.bytesReceived >= conn.second.incomingPacketLength)
 					{
 						int headerSize = 6;
 
 						// Client ID - Swap packet length to client ID
 						uint16_t u16;
-						u16 = connections_[i].socket_;
-						memcpy(connections_[i].buffer, &u16, sizeof(uint16_t));
+						u16 = conn.second.socket_;
+						memcpy(conn.second.buffer, &u16, sizeof(uint16_t));
 
 						// Send packet to messaging system
-						Message packet(std::string(connections_[i].buffer, connections_[i].incomingPacketLength));
+						Message packet(std::string(conn.second.buffer, conn.second.incomingPacketLength));
 						SendMessageSystem(packet);
 
-						connections_[i].bytesReceived = 0;
-						connections_[i].incomingPacketLength = 2; // 2 = Packet length size (bytes)
-						ZeroMemory(connections_[i].buffer, MAX_BUFFER_SIZE);
+						conn.second.bytesReceived = 0;
+						conn.second.incomingPacketLength = 2; // 2 = Packet length size (bytes)
+						ZeroMemory(conn.second.buffer, MAX_BUFFER_SIZE);
 					}
 				}
 				else if (bytesReceived == SOCKET_ERROR || bytesReceived == 0)
 				{
 					if (WSAGetLastError() != WSAEWOULDBLOCK)
 					{
-						std::cout << "Lost connection to " << connections_[i].socket_ << std::endl;
-						closesocket(connections_[i].socket_);
-						connections_.erase(connections_.begin() + i);
-						i -= 1;
+						std::cout << "Lost connection to " << conn.second.socket_ << std::endl;
+						closesocket(conn.second.socket_);
+						connections_.erase(conn.first);
 						continue;
 					}
 				}
@@ -158,36 +170,25 @@ void Network1::run()
 
 void Network1::CleanUp()
 {
-	for (int i = 0; i < connections_.size(); i++)
+	for (auto& conn : connections_)
 	{
-		closesocket(connections_[i].socket_);
-		connections_.erase(connections_.begin() + i);
+		closesocket(conn.second.socket_);
+		connections_.erase(conn.first);
 	}
 }
 
 void Network1::Listener_ConnectionReceived(SOCKET* socket)
 {
-	connections_.push_back(*socket);
+	connections_.insert(std::pair<unsigned int, TCPSocket>(*socket, *socket));
 
-	// Send new connection
-	//CreatePacket(clientid, type, sub, message);
-	char packetBuffer[128];
-
-	// Header
-	uint16_t clientID = *socket;
-	memcpy(packetBuffer, &clientID, sizeof(uint16_t));
-	uint16_t packetType = 0;
-	memcpy(packetBuffer + 2, &packetType, sizeof(uint16_t));
-	uint16_t packetSubType = 0;
-	memcpy(packetBuffer + 4, &packetSubType, sizeof(uint16_t));
-
-	// Message
-	//std::string message = "New_Connection";
-	//strcpy_s(packetBuffer + 6, sizeof(packetBuffer), message.c_str());
-
-	Message packet(std::string(packetBuffer, 6));
+	// Send new connection ID to game
+	std::string connectionPacket = CreatePacket(*socket, 0, 0, ""); //TODO:
+	Message packet(connectionPacket);
 	SendMessageSystem(packet);
 	Notify();
+
+	// Send new connection ID to client
+	Send(connections_[*socket].socket_, connectionPacket);
 }
 
 void Network1::Send(int clientSocket, std::string msg)
