@@ -61,11 +61,11 @@ int main() {
 	//	{
 	//		//std::string msg("::position::testtemp");
 
-	//		PacketData data;
-	//		InputPacket2 input;
-	//		input.up = true;
-	//		data.input = input;
-	//		TestPacket* testPacket = new TestPacket(data);
+			//PacketData data;
+			//InputPacket2 input;
+			//input.up = true;
+			//data.input = input;
+			//TestPacket* testPacket = new TestPacket(data);
 
 	//		//send(clientSocket, testPacket->buffer_, testPacket->bufferSize_, 0);
 
@@ -93,12 +93,6 @@ int main() {
 	////closesocket(clientSocket);
 	//WSACleanup();
 	//printf("Cleanup\n");
-
-
-
-	while (true)
-	{
-	}
 
 	return 0;
 }

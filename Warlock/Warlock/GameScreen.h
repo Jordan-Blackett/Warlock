@@ -8,6 +8,11 @@
 //#include "NetworkPlayer.h"
 #include "EntityBox.h"
 
+#include "ScreenManager.h"
+
+#include "Client_InputPacket.h"
+#include "TestPacket.h"
+
 class GameScreen : public Screen
 {
 public:

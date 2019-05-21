@@ -20,6 +20,16 @@ public:
 		return message_;
 	}
 
+	void assignStr(std::string str, size_t start, size_t end)
+	{
+		message_.assign(str, start, end);
+	}
+
+	void memcpyStr(void* src , size_t size)
+	{
+		memcpy(&message_[0], src, size);
+	}
+
 private:
 	std::string message_;
 };

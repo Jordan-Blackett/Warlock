@@ -2,11 +2,11 @@
 
 
 
-TestPacket::TestPacket(const PacketData& data)
+TestPacket::TestPacket(const PacketData& data, const uint16_t Type, const uint16_t SubType)
 {
 	PacketHeader* packetHeader = new PacketHeader();
-	packetHeader->msgType = 1;
-	packetHeader->msgSubType = 0;
+	packetHeader->msgType = Type;
+	packetHeader->msgSubType = SubType;
 
 	htonHeaderData(*packetHeader, data);
 
@@ -29,7 +29,6 @@ TestPacket::~TestPacket()
 void TestPacket::htonHeaderData(const PacketHeader& header, const PacketData& data)
 {
 	htonHeader(header);
-	//devider
 	htonData(data);
 
 	// Packet size
@@ -41,9 +40,6 @@ void TestPacket::htonHeaderData(const PacketHeader& header, const PacketData& da
 void TestPacket::htonHeader(const PacketHeader& header)
 {
 	uint16_t u16;
-	//u16 = htons(header.msgLength);
-	//memcpy(buffer_ + bufferOffset_, &u16, sizeof(uint16_t));
-	//bufferOffset_ += sizeof(uint16_t);
 	u16 = htons(header.msgType);
 	memcpy(buffer_ + bufferOffset_, &u16, sizeof(uint16_t));
 	bufferOffset_ += sizeof(uint16_t);

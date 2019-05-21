@@ -44,7 +44,17 @@ void GameScreen::Update()
 
 	while (accumulator >= dt)
 	{
-		player->movePlayer();
+		InputPacket2 input = player->movePlayer();
+
+		PacketData data;
+		data.input = input;
+		TestPacket* testPacket = new TestPacket(data, 10, 0);
+
+		// Send Input to Server
+		//std::string msg = ScreenManager::GetInstance()->CreatePacket(0, 10, 0, "");
+		//ScreenManager::GetInstance()->SendMessage(msg);
+		ScreenManager::GetInstance()->SendMessage(std::string(testPacket->buffer_, testPacket->bufferSize_));
+		ScreenManager::GetInstance()->MNotify();
 
 		// Run Simulation
 		world->Step(1 / 60.0f, 8, 3);

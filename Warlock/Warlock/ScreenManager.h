@@ -3,6 +3,7 @@
 #include "Screen.h"
 
 #include "GameScreen.h"
+#include <WinSock2.h>
 
 #include "Client_BusNode.h"
 
@@ -15,6 +16,10 @@ public:
 	void Initialize(Client_MessagingSystem* messageBus, sf::RenderWindow* Window);
 	void Update();
 	void Render();
+
+	void SendMessage(std::string Message);
+	std::string CreatePacket(uint16_t clientID, uint16_t packetType, uint16_t packetSubType, std::string message);
+	void MNotify();
 
 private:
 	ScreenManager(); // Private constructor to prevent instancing

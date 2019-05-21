@@ -55,10 +55,14 @@ std::string Network1::CreatePacket(uint16_t clientID, uint16_t packetType, uint1
 {
 	char packetBuffer[128];
 
+	uint16_t clientIDHtoN = htons(clientID);
+	uint16_t packetTypeHtoN = htons(packetType);
+	uint16_t packetSubTypeHtoN = htons(packetSubType);
+
 	// Header
-	memcpy(packetBuffer, &clientID, sizeof(uint16_t));
-	memcpy(packetBuffer + 2, &packetType, sizeof(uint16_t));
-	memcpy(packetBuffer + 4, &packetSubType, sizeof(uint16_t));
+	memcpy(packetBuffer, &clientIDHtoN, sizeof(uint16_t));
+	memcpy(packetBuffer + 2, &packetTypeHtoN, sizeof(uint16_t));
+	memcpy(packetBuffer + 4, &packetSubTypeHtoN, sizeof(uint16_t));
 
 	// Message
 	if (message != "")
@@ -138,7 +142,7 @@ void Network1::run()
 
 						// Client ID - Swap packet length to client ID
 						uint16_t u16;
-						u16 = conn.second.socket_;
+						u16 = htons(conn.second.socket_);
 						memcpy(conn.second.buffer, &u16, sizeof(uint16_t));
 
 						// Send packet to messaging system
@@ -188,7 +192,9 @@ void Network1::Listener_ConnectionReceived(SOCKET* socket)
 	Notify();
 
 	// Send new connection ID to client
-	Send(connections_[*socket].socket_, connectionPacket);
+	// loop through clients TODO:
+	// TODO: UDP SEND TCP SEND
+	Send(connections_[*socket].socket_, connectionPacket); //UDP
 }
 
 void Network1::Send(int clientSocket, std::string msg)

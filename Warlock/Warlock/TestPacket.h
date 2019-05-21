@@ -7,7 +7,7 @@
 
 // MessageLength (16-bits), MessageType (8-bits) and MessageSubType (8-bits)
 struct PacketHeader {
-	uint16_t msgClientID;
+	//uint16_t msgClientID;
 	uint16_t msgType;
 	uint16_t msgSubType;
 };
@@ -31,7 +31,7 @@ struct PacketData {
 class TestPacket
 {
 public:
-	TestPacket(const PacketData& data);
+	TestPacket(const PacketData& data, const uint16_t Type, const uint16_t SubType);
 	~TestPacket();
 
 	void htonHeaderData(const struct PacketHeader& header, const struct PacketData& data);
@@ -40,7 +40,7 @@ public:
 
 	//char[] GetBuffer() { return buffer_; }
 	//char* buffer_;
-	char buffer_[20]; //128
+	char buffer_[128]; //128
 	int bufferSize_ = 0;
 
 private:
