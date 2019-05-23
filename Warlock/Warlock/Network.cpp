@@ -64,17 +64,49 @@ void Network::InitTCP()
 
 	char buf[MAX_BUFFER_SIZE];
 
+	int pbytesReceived = 0;
+	int pincomingPacketLength = 2;
+
 	// TCP Receive
 	while (true)
 	{
 		ZeroMemory(buf, MAX_BUFFER_SIZE);
 
-		int bytesReceived = recv(clientSocket, buf, 4096, 0);
+		//int bytesReceived = recv(clientSocket, buf, 4096, 0);
+		//if (bytesReceived > 0)
+		//{
+		//	// Send packet to messaging system
+		//	Message packet(std::string(buf, bytesReceived));
+		//	SendMessageSystem(packet);
+		//}
+
+		int bytesReceived = recv(clientSocket, buf, pincomingPacketLength - pbytesReceived, 0);
 		if (bytesReceived > 0)
 		{
-			// Send packet to messaging system
-			Message packet(std::string(buf, bytesReceived));
-			SendMessageSystem(packet);
+			if (pincomingPacketLength == 2)
+			{
+				// Get packet length value of first 2 bytes
+				uint16_t packetLength;
+				memcpy(&packetLength, buf, 2);
+				packetLength = htons(packetLength);
+				pincomingPacketLength = packetLength;
+			}
+
+			memcpy(buf + pbytesReceived, buf, bytesReceived);
+
+			pbytesReceived += bytesReceived;
+			if (pbytesReceived >= pincomingPacketLength)
+			{
+				int headerSize = 6;
+
+				// Send packet to messaging system
+				Message packet(std::string(buf, pbytesReceived));
+				SendMessageSystem(packet);
+
+				pbytesReceived = 0;
+				pincomingPacketLength = 2; // 2 = Packet length size (bytes)
+				ZeroMemory(buf, MAX_BUFFER_SIZE);
+			}
 		}
 	}
 }
@@ -148,13 +180,39 @@ void Network::onNotify(Message message)
 	packetSubType = ntohs(packetSubType);
 	bufferOffset += sizeof(uint16_t);
 
+	ObjectState* objectState = new ObjectState();
+
 	switch (packetType)
 	{
 		// New_Connection
 		case 0:
 			std::cout << "Client ID: " << ClientID << std::endl;
+			std::cout << "packetType: " << packetType << std::endl;
 			clientID_ = ClientID;
 		break;
+		// Snapshot
+		case 1:
+			//std::cout << "Snapshot" << std::endl;
+
+			// snapshot
+			//SnapshotPacket snapshotPacket = new SnapshotPacket();
+			//InputPacket newInputPacket;
+
+			//snapshotPacket->objectStates
+
+
+			memcpy(&objectState->positionX, message.getMessage().c_str() + bufferOffset, sizeof(uint16_t));
+			objectState->positionX = htons(objectState->positionX);
+			bufferOffset += sizeof(uint16_t);
+			memcpy(&objectState->positionY, message.getMessage().c_str() + bufferOffset, sizeof(uint16_t));
+			objectState->positionY = htons(objectState->positionY);
+			bufferOffset += sizeof(uint16_t);
+
+			std::cout << objectState->positionX << "::" << objectState->positionY << std::endl;
+
+			
+
+			break;
 		// Send Packet
 		case 10: // Input
 			//std::cout << "Packet Size: " << ClientID << std::endl;

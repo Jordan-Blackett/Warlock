@@ -73,6 +73,62 @@ std::string Network1::CreatePacket(uint16_t clientID, uint16_t packetType, uint1
 	return std::string(packetBuffer, 6);
 }
 
+std::string Network1::CreatePacket2(uint16_t type, uint16_t sub, PacketData* data)
+{
+	buffer_[128]; // TODO: clear
+	bufferSize_ = 0;
+	bufferOffset_ = 2;
+
+	PacketHeader* packetHeader = new PacketHeader();
+	packetHeader->msgType = type;
+	packetHeader->msgSubType = sub;
+
+	htonHeaderData(*packetHeader, *data);
+
+	bufferSize_ = bufferOffset_;
+
+	return std::string(buffer_, bufferSize_);
+}
+
+void Network1::htonHeaderData(const PacketHeader & header, const PacketData & data)
+{
+	htonHeader(header);
+	htonData(data);
+
+	// Packet size
+	uint16_t u16;
+	u16 = htons(bufferOffset_);
+	memcpy(buffer_, &u16, sizeof(uint16_t));
+}
+
+void Network1::htonHeader(const PacketHeader & header)
+{
+	uint16_t u16;
+	u16 = htons(header.msgType);
+	memcpy(buffer_ + bufferOffset_, &u16, sizeof(uint16_t));
+	bufferOffset_ += sizeof(uint16_t);
+	u16 = htons(header.msgSubType);
+	memcpy(buffer_ + bufferOffset_, &u16, sizeof(uint16_t));
+	bufferOffset_ += sizeof(uint16_t);
+}
+
+void Network1::htonData(const PacketData & data)
+{
+	if (data.snapshot != nullptr)
+	{
+		for(auto const& obj : data.snapshot->objectStates)
+		{
+			uint16_t u16;
+			u16 = htons(obj->positionX);
+			memcpy(buffer_ + bufferOffset_, &u16, sizeof(uint16_t));
+			bufferOffset_ += sizeof(uint16_t);
+			u16 = htons(obj->positionY);
+			memcpy(buffer_ + bufferOffset_, &u16, sizeof(uint16_t));
+			bufferOffset_ += sizeof(uint16_t);
+		}
+	}
+}
+
 void Network1::SendToMessageSystem(const std::string * msg)
 {
 	Message packet(*msg);
@@ -84,7 +140,7 @@ void Network1::run()
 	while (true)
 	{
 		// Message System
-		Notify();
+		//Notify();
 
 		if (connections_.size() == 0)
 		{
@@ -194,12 +250,20 @@ void Network1::Listener_ConnectionReceived(SOCKET* socket)
 	// Send new connection ID to client
 	// loop through clients TODO:
 	// TODO: UDP SEND TCP SEND
-	Send(connections_[*socket].socket_, connectionPacket); //UDP
+	//Send(connections_[*socket].socket_, connectionPacket); //UDP
 }
 
 void Network1::Send(int clientSocket, std::string msg)
 {
 	send(clientSocket, msg.c_str(), msg.size() + 1, 0);
+}
+
+void Network1::SendAll(std::string msg)
+{
+	for (auto const& ID : connections_)
+	{
+		send(ID.first, msg.c_str(), msg.size() + 1, 0);
+	}
 }
 
 void Network1::PrintExceptionalCondition(SOCKET socket)

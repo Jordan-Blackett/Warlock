@@ -19,6 +19,15 @@
 #define UDP_PORT 52000
 #define MAX_BUFFER_SIZE (25) //49152
 
+struct PacketHeader {
+	uint16_t msgType;
+	uint16_t msgSubType;
+};
+
+struct PacketData {
+	SnapshotPacket* snapshot;
+};
+
 class Network1 : public BusNode
 {
 public:
@@ -30,6 +39,12 @@ public:
 	void InitUDP();
 
 	std::string CreatePacket(uint16_t clientid, uint16_t type, uint16_t sub, std::string message);
+	std::string CreatePacket2(uint16_t type, uint16_t sub, PacketData* data);
+
+	void htonHeaderData(const struct PacketHeader& header, const struct PacketData& data);
+	void htonHeader(const struct PacketHeader& header);
+	void htonData(const struct PacketData& data);
+
 	void SendToMessageSystem(const std::string* msg);
 
 	void run();
@@ -39,6 +54,7 @@ public:
 	void Listener_ConnectionReceived(SOCKET* socket);
 	
 	void Send(int clientSocket, std::string msg);
+	void SendAll(std::string msg);
 
 private:
 	void PrintExceptionalCondition(SOCKET socket);
@@ -53,6 +69,21 @@ private:
 	std::map<u_int64, TCPSocket> connections_;
 	//std::vector<TCPSocket> connections_;
 
-	void onNotify(Message message) {}
+	// Packet Data
+	char buffer_[128];
+	int bufferSize_ = 0;
+	int bufferOffset_ = 2; // 0-1 is packet size
+
+	void onNotify(Message message) 
+	{
+		if (message.getMessage() == "Snapshot::")
+		{
+			std::cout << message.getMessage() << "::" << message.GetSnapshotPacket() << std::endl;
+
+			PacketData* data = new PacketData();
+			data->snapshot = message.GetSnapshotPacket();
+			SendAll(CreatePacket2(1, 0, data));
+		}
+	}
 };
 

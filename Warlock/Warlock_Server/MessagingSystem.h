@@ -4,15 +4,19 @@
 #include <queue>
 #include <vector>
 #include "MutexQueue.h"
+#include "Server_SnapshotPacket.h"
 
 #include <iostream>
 
 struct Message
 {
 public:
-	Message(const std::string message)
+	Message(const std::string message, SnapshotPacket* packet = nullptr)
 	{
 		message_ = message;
+
+		if (packet != nullptr)
+			snapshotPacket_ = packet;
 	}
 
 	std::string getMessage()
@@ -20,8 +24,14 @@ public:
 		return message_;
 	}
 
+	SnapshotPacket* GetSnapshotPacket()
+	{
+		return snapshotPacket_;
+	}
+
 private:
 	std::string message_;
+	SnapshotPacket* snapshotPacket_;
 };
 
 class MessagingSystem
@@ -42,6 +52,7 @@ public:
 
 	void notify()
 	{
+		std::unique_lock<std::mutex> l(lock_);
 		while (!messages_.isEmpty()) {
 			for (auto iter = receivers_.begin(); iter != receivers_.end(); iter++) {
 				(*iter)(messages_.front());
@@ -53,5 +64,6 @@ public:
 private:
 	std::vector<std::function<void(Message)>> receivers_;
 	MutexQueue<Message> messages_;
+	std::mutex lock_;
 };
 

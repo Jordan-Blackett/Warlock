@@ -11,20 +11,10 @@
 
 #include "InputPacket.h"
 
+#include "Server_SnapshotPacket.h"
+
 #define ScreenWidth 1024
 #define ScreenHeight 768
-
-//// MOVE TO CONSUMER
-//struct InputPacket {
-//	uint8_t left = false;
-//	uint8_t right = false;
-//	uint8_t up = false;
-//	uint8_t down = false;
-//	uint8_t space = false;
-//	uint8_t leftclick = false;
-//	uint8_t rightclick = false;
-//	uint16_t frameID;
-//};
 
 class Warlock : public BusNode
 {
@@ -64,67 +54,6 @@ private:
 
 	sf::RenderWindow* window_;
 
-	void onNotify(Message message)
-	{
-		int bufferOffset = 0;
-		uint16_t ClientID = 0;
-		uint16_t packetType = 0;
-		uint16_t packetSubType = 0;
-
-		// Client ID
-		memcpy(&ClientID, message.getMessage().c_str() + bufferOffset, sizeof(uint16_t));
-		ClientID = ntohs(ClientID); // TODO: not necessary as there's only one hton call 
-		bufferOffset += sizeof(uint16_t);
-
-		// Type/ Sub-Type
-		memcpy(&packetType, message.getMessage().c_str() + bufferOffset, sizeof(uint16_t));
-		packetType = ntohs(packetType);
-		bufferOffset += sizeof(uint16_t);
-		//std::cout << "packetType: " << packetType << std::endl;
-		memcpy(&packetSubType, message.getMessage().c_str() + bufferOffset, sizeof(uint16_t));
-		packetSubType = ntohs(packetSubType);
-		bufferOffset += sizeof(uint16_t);
-
-		switch(packetType)
-		{
-			// New_Connection
-			case 0:
-				// Player already exist
-				if (clientEntities.find(ClientID) == clientEntities.end())
-				{
-					std::cout << "New Client ID: " << ClientID << std::endl;
-					CreateNewPlayer(ClientID);
-				}
-			break;
-			// Input Packet
-			case 10:
-				// TO FUNCTION
-				InputPacket newInputPacket;
-
-				memcpy(&newInputPacket.left, message.getMessage().c_str() + bufferOffset, sizeof(uint8_t));
-				bufferOffset += sizeof(uint8_t);
-				memcpy(&newInputPacket.right, message.getMessage().c_str() + bufferOffset, sizeof(uint8_t));
-				bufferOffset += sizeof(uint8_t);
-				memcpy(&newInputPacket.up, message.getMessage().c_str() + bufferOffset, sizeof(uint8_t));
-				bufferOffset += sizeof(uint8_t);
-				memcpy(&newInputPacket.down, message.getMessage().c_str() + bufferOffset, sizeof(uint8_t));
-				bufferOffset += sizeof(uint8_t);
-				//newInputPacket.left = (uint8_t)message.getMessage().c_str() + ++bufferOffset;
-				//newInputPacket.right = (uint8_t)(message.getMessage().c_str() + ++bufferOffset);
-				//newInputPacket.up = (uint8_t)message.getMessage().c_str() + ++bufferOffset;
-				//newInputPacket.down = (uint8_t)message.getMessage().c_str() + ++bufferOffset;
-				
-				if (clientEntities.find(ClientID) == clientEntities.end())
-				{
-					std::cout << "Client ID not found: " << ClientID << std::endl;
-				}
-				else
-				{
-					clientEntities[ClientID]->MoveEntity(&newInputPacket);
-				}
-				//	Add to input buffer
-			break;
-		}
-	}
+	void onNotify(Message message);
 };
 

@@ -10,6 +10,7 @@
 #include "Client_BusNode.h"
 
 #include "TestPacket.h"
+#include "Client_SnapshotPacket.h"
 
 #define TCP_PORT 54000
 #define UDP_PORT 52000

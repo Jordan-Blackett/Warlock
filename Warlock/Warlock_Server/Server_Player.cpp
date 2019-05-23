@@ -64,4 +64,8 @@ void Server_Player::MoveEntity(InputPacket* input)
 
 	b2Vec2 impulse = b2Vec2(body_->GetMass() * velChange.x, body_->GetMass() * velChange.y); //disregard time factor
 	body_->ApplyLinearImpulse(b2Vec2(impulse.x, impulse.y), body_->GetWorldCenter(), true);
+
+	// TODO: replace getpos fun
+	position_.x = body_->GetPosition().x * scale_;
+	position_.y = body_->GetPosition().y * scale_;
 }

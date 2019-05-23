@@ -46,3 +46,8 @@ void Server_Entity::createFixture(b2Shape* shape)
 void Server_Entity::Render(sf::RenderWindow & Window)
 {
 }
+
+sf::Vector2i Server_Entity::GetPosition()
+{
+	return position_;
+}

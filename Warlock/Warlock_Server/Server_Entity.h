@@ -9,6 +9,8 @@ public:
 	Server_Entity();
 	~Server_Entity();
 
+	sf::Vector2i GetPosition();
+
 protected:
 	void InitDynamicBody(b2World* world);
 
