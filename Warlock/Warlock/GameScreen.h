@@ -53,5 +53,16 @@ private:
 	sf::Vector2f boxSize{ sf::Vector2f(15, 15) };
 	std::vector<EntityBox*> boxes;
 	//std::vector<WorldWall*> walls;
+
+	std::queue<SnapshotPacket*> snapshotQueue_;
+
+	void onNotify(Message message)
+	{
+		if (message.getMessage() == "Snapshot::")
+		{
+			std::cout << message.getMessage() << std::endl;
+			snapshotQueue_.push(message.GetSnapshotPacket());
+		}
+	}
 };
 

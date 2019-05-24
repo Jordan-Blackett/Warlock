@@ -39,8 +39,9 @@ void EntityBox::InitRectangle()
 
 void EntityBox::Render(sf::RenderWindow &Window)
 {
-	rectangle_.setPosition(body_->GetPosition().x * scale_, body_->GetPosition().y * scale_);
-	rectangle_.setRotation(body_->GetAngle() * 180 / b2_pi);
+	//rectangle_.setPosition(body_->GetPosition().x * scale_, body_->GetPosition().y * scale_);
+	rectangle_.setPosition(position_.x, position_.y);
+	//rectangle_.setRotation(body_->GetAngle() * 180 / b2_pi);
 
 	Window.draw(rectangle_);
 }

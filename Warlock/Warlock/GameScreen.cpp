@@ -57,9 +57,18 @@ void GameScreen::Update()
 		ScreenManager::GetInstance()->MNotify();
 
 		// Run Simulation
-		world->Step(1 / 60.0f, 8, 3);
+		//world->Step(1 / 60.0f, 8, 3);
 
 		accumulator -= dt;
+	}
+
+	// TODO: Function - interp - etc
+	// Consume snapshot
+	if (!snapshotQueue_.empty())
+	{
+		SnapshotPacket* snapshot = snapshotQueue_.front();
+		snapshotQueue_.pop();
+		player->SetPosition(sf::Vector2i(snapshot->objectStates[0]->positionX, snapshot->objectStates[0]->positionY));
 	}
 }
 

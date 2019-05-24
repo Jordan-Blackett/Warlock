@@ -4,20 +4,29 @@
 #include <queue>
 #include <vector>
 #include "Client_MutexQueue.h"
+#include "Client_SnapshotPacket.h"
 
 #include <iostream>
 
 struct Message
 {
 public:
-	Message(const std::string message)
+	Message(const std::string message, SnapshotPacket* packet = nullptr)
 	{
 		message_ = message;
+
+		if (packet != nullptr)
+			snapshotPacket_ = packet;
 	}
 
 	std::string getMessage()
 	{
 		return message_;
+	}
+
+	SnapshotPacket* GetSnapshotPacket()
+	{
+		return snapshotPacket_;
 	}
 
 	void assignStr(std::string str, size_t start, size_t end)
@@ -32,6 +41,7 @@ public:
 
 private:
 	std::string message_;
+	SnapshotPacket* snapshotPacket_;
 };
 
 class Client_MessagingSystem

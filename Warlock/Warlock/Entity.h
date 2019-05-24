@@ -9,6 +9,8 @@ public:
 	Entity();
 	~Entity();
 
+	void SetPosition(sf::Vector2i pos);
+
 protected:
 	void InitDynamicBody(b2World* world);
 

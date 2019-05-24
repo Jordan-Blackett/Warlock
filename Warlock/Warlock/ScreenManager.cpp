@@ -36,9 +36,7 @@ void ScreenManager::Render()
 
 void ScreenManager::onNotify(Message message)
 {
-	// Consumer
-
-	//currentScreen->onNotify(message);
+	currentScreen->onNotify(message);
 }
 
 void ScreenManager::SendMessage(std::string NewMessage)

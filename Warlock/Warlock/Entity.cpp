@@ -46,3 +46,8 @@ void Entity::createFixture(b2Shape* shape)
 void Entity::Render(sf::RenderWindow & Window)
 {
 }
+
+void Entity::SetPosition(sf::Vector2i pos)
+{
+	position_ = pos;
+}

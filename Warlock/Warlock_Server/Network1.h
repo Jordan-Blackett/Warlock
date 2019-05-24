@@ -78,7 +78,7 @@ private:
 	{
 		if (message.getMessage() == "Snapshot::")
 		{
-			std::cout << message.getMessage() << "::" << message.GetSnapshotPacket() << std::endl;
+			//std::cout << message.getMessage() << "::" << message.GetSnapshotPacket() << std::endl;
 
 			PacketData* data = new PacketData();
 			data->snapshot = message.GetSnapshotPacket();

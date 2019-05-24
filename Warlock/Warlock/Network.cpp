@@ -179,8 +179,10 @@ void Network::onNotify(Message message)
 	memcpy(&packetSubType, message.getMessage().c_str() + bufferOffset, sizeof(uint16_t));
 	packetSubType = ntohs(packetSubType);
 	bufferOffset += sizeof(uint16_t);
-
+	// TODO: SKIPPED BY CASE LABEL
+	SnapshotPacket* snapshotPacket = new SnapshotPacket();
 	ObjectState* objectState = new ObjectState();
+	std::string newMessage("Snapshot::");
 
 	switch (packetType)
 	{
@@ -194,12 +196,7 @@ void Network::onNotify(Message message)
 		case 1:
 			//std::cout << "Snapshot" << std::endl;
 
-			// snapshot
-			//SnapshotPacket snapshotPacket = new SnapshotPacket();
-			//InputPacket newInputPacket;
-
-			//snapshotPacket->objectStates
-
+			// Snapshot
 
 			memcpy(&objectState->positionX, message.getMessage().c_str() + bufferOffset, sizeof(uint16_t));
 			objectState->positionX = htons(objectState->positionX);
@@ -210,7 +207,9 @@ void Network::onNotify(Message message)
 
 			std::cout << objectState->positionX << "::" << objectState->positionY << std::endl;
 
-			
+			snapshotPacket->objectStates.push_back(objectState);
+
+			SendMessageSystem(Message(newMessage, snapshotPacket));
 
 			break;
 		// Send Packet
