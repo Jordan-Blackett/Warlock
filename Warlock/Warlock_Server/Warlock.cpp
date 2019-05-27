@@ -18,6 +18,29 @@ bool Warlock::Init()
 	// Prepare the world
 	InitPhysicalWorld();
 
+	// Prepare the level
+	screenCenter_ = sf::Vector2f(ScreenWidth / 2, ScreenHeight / 2);
+	// Function
+
+	// Arena
+	//radiusSize_ = screenCenter_.y - 10;
+	//arenaRing_.setRadius(radiusSize_);
+	//arenaRing_.setPosition(screenCenter_);
+	//arenaRing_.setOrigin(radiusSize_, radiusSize_);
+	//arenaRing_.setFillColor(sf::Color::Blue);
+	//arenaRing_.setOutlineThickness(10);
+	//arenaRing_.setOutlineColor(sf::Color::White);
+
+	// Collision
+
+	test.init(world, sf::Vector2i(screenCenter_), screenCenter_.y - 10);
+
+	// Ball
+	//arenaDeathBallAnchorPoint_ = new Server_DeathBallAnchorPoint(sf::Vector2i(screenCenter_), scale);
+	//arenaDeathBallAnchorPoint_->InitStaticBody(world);
+
+	arenaDeathBall_.init(world, sf::Vector2i(screenCenter_), 20, scale, nullptr);
+
 	return true;
 }
 
@@ -57,8 +80,34 @@ void Warlock::Run()
 			//Input buffer
 			//player->movePlayer();
 
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+			{
+				arenaDeathBall_.Kick(sf::Vector2f(0, -7));
+			}
+
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+			{
+				arenaDeathBall_.Kick(sf::Vector2f(0, 7));
+			}
+
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+			{
+				arenaDeathBall_.Kick(sf::Vector2f(-7, 0));
+			}
+
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+			{
+				arenaDeathBall_.Kick(sf::Vector2f(7, 0));
+			}
+
+			//arenaDeathBall_.Kick(sf::Vector2f(1, 0));
+			//deathwall.Kick(sf::Vector2f(-1, 0));
+
 			//Run Simulation
 			world->Step(1 / 60.0f, 8, 3);
+
+			// Player update
+
 
 			// TODO: Send snapshot (FUNCTION)
 			SnapshotPacket* snapshotPacket = new SnapshotPacket();
@@ -87,6 +136,10 @@ void Warlock::Run()
 		// Render
 		window_->clear();
 
+		test.Render(*window_);
+
+		arenaDeathBall_.Render(*window_);
+
 		for (auto it = clientEntities.begin(); it != clientEntities.end(); ++it)
 		{
 			it->second->Render(*window_);
@@ -98,7 +151,7 @@ void Warlock::Run()
 void Warlock::CreateNewPlayer(unsigned int ClientID)
 {
 	Server_Player* box = new Server_Player();
-	box->init(world, sf::Vector2i(100, 100), boxSize, scale);
+	box->init(world, sf::Vector2i(screenCenter_), boxSize, scale);
 	clientEntities.insert(std::pair<unsigned int, Server_Player*>(ClientID, box));
 }
 

@@ -13,6 +13,6 @@ public:
 	void MoveEntity(InputPacket* input);
 
 private:
-	float speed = 0.5f;
+	float speed = 1.5f;
 };
 

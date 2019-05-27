@@ -8,10 +8,14 @@
 #include <WinSock2.h>
 
 #include "Server_Player.h"
+#include "Server_Dealthball.h"
+#include "Server_DeathBallAnchorPoint.h"
+#include "Server_ArenaSphere.h"
 
 #include "InputPacket.h"
 
 #include "Server_SnapshotPacket.h"
+
 
 #define ScreenWidth 1024
 #define ScreenHeight 768
@@ -35,7 +39,7 @@ private:
 	// Physics
 	b2World * world;
 	const float scale = 32.f; // Convert between pixel and real-world coordinates
-	const float verticalGravity = 0.0f;
+	const float verticalGravity = 1.f;
 	const float horizontalGravity = 0.0f;
 
 	// Physics tick rate - Timestep
@@ -45,6 +49,18 @@ private:
 
 	double simulationTimeLastUpdated_;
 	sf::Time simulationTicktime_;
+
+	// Level
+	sf::Vector2f screenCenter_;
+	sf::CircleShape arenaRing_;
+	float radiusSize_;
+
+	Server_ArenaSphere test;
+
+	Server_DealthBall arenaDeathBall_;
+	//Server_DeathBallAnchorPoint* arenaDeathBallAnchorPoint_;
+
+
 
 	//Entities
 	std::map<u_int64, Server_Player*> clientEntities;

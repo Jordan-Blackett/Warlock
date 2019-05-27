@@ -14,7 +14,6 @@ public:
 protected:
 	void InitRectangle();
 
-
 protected:
 	sf::Vector2f rectSize_;
 	sf::RectangleShape rectangle_;

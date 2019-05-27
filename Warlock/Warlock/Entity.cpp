@@ -39,7 +39,7 @@ void Entity::createFixture(b2Shape* shape)
 	b2FixtureDef fixtureDef;
 	fixtureDef.shape = shape;
 	fixtureDef.density = 1.0f;
-	fixtureDef.friction = 0.7f;
+	fixtureDef.friction =  0.7f;
 	body_->CreateFixture(&fixtureDef);
 }
 

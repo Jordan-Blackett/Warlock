@@ -30,7 +30,7 @@ void Server_Entity::addRectangularFixtureToBody(sf::Vector2f size)
 void Server_Entity::addCircularFixtureToBody(float radius)
 {
 	b2CircleShape shape;
-	shape.m_radius = radius * scale_;
+	shape.m_radius = radius / scale_;
 	createFixture(&shape);
 }
 
@@ -40,6 +40,7 @@ void Server_Entity::createFixture(b2Shape* shape)
 	fixtureDef.shape = shape;
 	fixtureDef.density = 1.0f;
 	fixtureDef.friction = 0.7f;
+	fixtureDef.restitution = 1.0f;
 	body_->CreateFixture(&fixtureDef);
 }
 
