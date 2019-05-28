@@ -13,14 +13,16 @@ public:
 
 	void Render(sf::RenderWindow &Window);
 
+	std::vector<b2Vec2> CreateCircle(int sides, float radius, sf::Vector2i offsetPosition);
+	void CreateConvex(b2Vec2* vertices, int points);
+
 private:
 	b2Body* body_;
+	std::vector<b2Vec2> arenaSphereVertices_;
+	int arenaSphereSides_ = 20;
+	int scale_;
 
+	sf::ConvexShape convex_;
 
-	int sides = 20;
-
-	sf::ConvexShape convex;
-	b2Vec2 vertices[20];
-	sf::VertexArray blah;
 };
 

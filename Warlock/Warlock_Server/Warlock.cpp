@@ -20,25 +20,12 @@ bool Warlock::Init()
 
 	// Prepare the level
 	screenCenter_ = sf::Vector2f(ScreenWidth / 2, ScreenHeight / 2);
-	// Function
 
 	// Arena
-	//radiusSize_ = screenCenter_.y - 10;
-	//arenaRing_.setRadius(radiusSize_);
-	//arenaRing_.setPosition(screenCenter_);
-	//arenaRing_.setOrigin(radiusSize_, radiusSize_);
-	//arenaRing_.setFillColor(sf::Color::Blue);
-	//arenaRing_.setOutlineThickness(10);
-	//arenaRing_.setOutlineColor(sf::Color::White);
-
-	// Collision
-
-	test.init(world, sf::Vector2i(screenCenter_), screenCenter_.y - 10);
+	radiusSize_ = screenCenter_.y - 10;
+	arenaRing_.init(world, sf::Vector2i(screenCenter_), radiusSize_);
 
 	// Ball
-	//arenaDeathBallAnchorPoint_ = new Server_DeathBallAnchorPoint(sf::Vector2i(screenCenter_), scale);
-	//arenaDeathBallAnchorPoint_->InitStaticBody(world);
-
 	arenaDeathBall_.init(world, sf::Vector2i(screenCenter_), 20, scale, nullptr);
 
 	return true;
@@ -100,14 +87,10 @@ void Warlock::Run()
 				arenaDeathBall_.Kick(sf::Vector2f(7, 0));
 			}
 
-			//arenaDeathBall_.Kick(sf::Vector2f(1, 0));
-			//deathwall.Kick(sf::Vector2f(-1, 0));
-
 			//Run Simulation
 			world->Step(1 / 60.0f, 8, 3);
 
 			// Player update
-
 
 			// TODO: Send snapshot (FUNCTION)
 			SnapshotPacket* snapshotPacket = new SnapshotPacket();
@@ -124,7 +107,6 @@ void Warlock::Run()
 
 			// Objects
 
-
 			// Send Message To Network
 			std::string newMessage("Snapshot::");
 			SendMessageSystem(Message(newMessage, snapshotPacket));
@@ -136,7 +118,7 @@ void Warlock::Run()
 		// Render
 		window_->clear();
 
-		test.Render(*window_);
+		arenaRing_.Render(*window_);
 
 		arenaDeathBall_.Render(*window_);
 

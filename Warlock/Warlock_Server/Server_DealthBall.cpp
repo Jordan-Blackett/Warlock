@@ -11,26 +11,16 @@ Server_DealthBall::~Server_DealthBall()
 {
 }
 
-void Server_DealthBall::init(b2World * world, sf::Vector2i position, float size, int scale, b2Body* anchorPoint)
+void Server_DealthBall::init(b2World * world, sf::Vector2i position, float size, int scale)
 {
 	Server_EntitySphere::init(world, position, size, scale);
-
-	//Create rope joint
-	//b2RopeJointDef ropeDef;
-	//ropeDef.maxLength = 14;
-	//ropeDef.localAnchorA = b2Vec2_zero; 
-	//ropeDef.localAnchorB = b2Vec2_zero;
-	//ropeDef.bodyA = body_;
-	//ropeDef.bodyB = anchorPoint;
-	//world->CreateJoint(&ropeDef);
 
 	sphere_.setFillColor(sf::Color::Red);
 }
 
 void Server_DealthBall::Kick(sf::Vector2f Direction)
 {
-	//body_->SetTransform(b2Vec2(4, 1), body_->GetAngle());
-
+	// Impulse TODO: function
 	//body_->ApplyLinearImpulse(b2Vec2(Direction.x, Direction.y), body_->GetWorldCenter(), true);
 
 	b2Vec2 desiredDir = b2Vec2(Direction.x, Direction.y);

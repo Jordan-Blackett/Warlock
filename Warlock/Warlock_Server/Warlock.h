@@ -9,13 +9,11 @@
 
 #include "Server_Player.h"
 #include "Server_Dealthball.h"
-#include "Server_DeathBallAnchorPoint.h"
 #include "Server_ArenaSphere.h"
 
 #include "InputPacket.h"
 
 #include "Server_SnapshotPacket.h"
-
 
 #define ScreenWidth 1024
 #define ScreenHeight 768
@@ -52,15 +50,10 @@ private:
 
 	// Level
 	sf::Vector2f screenCenter_;
-	sf::CircleShape arenaRing_;
+	Server_ArenaSphere arenaRing_;
 	float radiusSize_;
 
-	Server_ArenaSphere test;
-
 	Server_DealthBall arenaDeathBall_;
-	//Server_DeathBallAnchorPoint* arenaDeathBallAnchorPoint_;
-
-
 
 	//Entities
 	std::map<u_int64, Server_Player*> clientEntities;

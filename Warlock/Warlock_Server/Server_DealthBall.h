@@ -8,7 +8,7 @@ public:
 	Server_DealthBall();
 	~Server_DealthBall();
 
-	void init(b2World* world, sf::Vector2i position, float size, int scale, b2Body* anchorPoint);
+	void init(b2World* world, sf::Vector2i position, float size, int scale) override;
 	void Kick(sf::Vector2f Direction);
 
 private:
