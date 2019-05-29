@@ -26,7 +26,7 @@ bool Warlock::Init()
 	arenaRing_.init(world, sf::Vector2i(screenCenter_), radiusSize_);
 
 	// Ball
-	arenaDeathBall_.init(world, sf::Vector2i(screenCenter_), 20, scale, nullptr);
+	arenaDeathBall_.init(world, sf::Vector2i(screenCenter_), 20, scale);
 
 	return true;
 }
@@ -64,8 +64,14 @@ void Warlock::Run()
 		{
 			// Init new players - while in lobby mode
 
-			//Input buffer
-			//player->movePlayer();
+			//Input buffer - TODO: Function???
+			for (auto const& clientEntity : clientEntities)
+			{
+				if (!inputBuffer.Empty(clientEntity.first))
+				{
+					clientEntity.second->MoveEntity(inputBuffer.GetInputPacket(clientEntity.first), accumulator);
+				}
+			}
 
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
 			{
@@ -192,15 +198,15 @@ void Warlock::onNotify(Message message)
 		// Input Packet
 	case 10:
 		// TODO: TO FUNCTION
-		InputPacket newInputPacket;
+		InputPacket* newInputPacket = new InputPacket();
 
-		memcpy(&newInputPacket.left, message.getMessage().c_str() + bufferOffset, sizeof(uint8_t));
+		memcpy(&newInputPacket->left, message.getMessage().c_str() + bufferOffset, sizeof(uint8_t));
 		bufferOffset += sizeof(uint8_t);
-		memcpy(&newInputPacket.right, message.getMessage().c_str() + bufferOffset, sizeof(uint8_t));
+		memcpy(&newInputPacket->right, message.getMessage().c_str() + bufferOffset, sizeof(uint8_t));
 		bufferOffset += sizeof(uint8_t);
-		memcpy(&newInputPacket.up, message.getMessage().c_str() + bufferOffset, sizeof(uint8_t));
+		memcpy(&newInputPacket->up, message.getMessage().c_str() + bufferOffset, sizeof(uint8_t));
 		bufferOffset += sizeof(uint8_t);
-		memcpy(&newInputPacket.down, message.getMessage().c_str() + bufferOffset, sizeof(uint8_t));
+		memcpy(&newInputPacket->down, message.getMessage().c_str() + bufferOffset, sizeof(uint8_t));
 		bufferOffset += sizeof(uint8_t);
 
 
@@ -211,7 +217,7 @@ void Warlock::onNotify(Message message)
 		}
 		else
 		{
-			clientEntities[ClientID]->MoveEntity(&newInputPacket);
+			inputBuffer.Push(ClientID, newInputPacket);
 		}
 
 		break;

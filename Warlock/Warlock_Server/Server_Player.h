@@ -10,9 +10,12 @@ public:
 	~Server_Player();
 
 	void init(b2World* world, sf::Vector2i position, sf::Vector2f size, int scale) override;
-	void MoveEntity(InputPacket* input);
+	void MoveEntity(InputPacket* input, double deltaTime);
 
 private:
-	float speed = 1.5f;
+	float speed = 10.5f;
+
+
+	float maxSpeed = 4.5f;
 };
 

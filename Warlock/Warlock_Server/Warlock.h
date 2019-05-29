@@ -13,6 +13,7 @@
 
 #include "InputPacket.h"
 
+#include "Server_InputBuffer.h"
 #include "Server_SnapshotPacket.h"
 
 #define ScreenWidth 1024
@@ -64,5 +65,7 @@ private:
 	sf::RenderWindow* window_;
 
 	void onNotify(Message message);
+
+	Server_InputBuffer inputBuffer;
 };
 

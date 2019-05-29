@@ -18,7 +18,7 @@ void Server_Player::init(b2World * world, sf::Vector2i position, sf::Vector2f si
 	rectangle_.setFillColor(sf::Color::Red);
 }
 
-void Server_Player::MoveEntity(InputPacket* input)
+void Server_Player::MoveEntity(InputPacket* input, double deltaTime)
 {
 	enum _moveState {
 		MS_STOP,
@@ -60,10 +60,35 @@ void Server_Player::MoveEntity(InputPacket* input)
 	case MS_STOP: desiredVel = b2Vec2(0, 0); break;
 	}
 
-	b2Vec2 velChange = b2Vec2(desiredVel.x - vel.x, desiredVel.y - vel.y);
+	if (moveState != MS_STOP) {
+		//b2Vec2 velChange = b2Vec2(desiredVel.x - vel.x, desiredVel.y - vel.y);
+		//b2Vec2 impulse = b2Vec2(body_->GetMass() * velChange.x, body_->GetMass() * velChange.y); //disregard time factor
+		
 
-	b2Vec2 impulse = b2Vec2(body_->GetMass() * velChange.x, body_->GetMass() * velChange.y); //disregard time factor
-	body_->ApplyLinearImpulse(b2Vec2(impulse.x, impulse.y), body_->GetWorldCenter(), true);
+		//b2Vec2 acceleration = b2Vec2(desiredVel.x,  desiredVel.y); // acc
+
+		// Current velocity
+		const b2Vec2 currentVelocity = body_->GetLinearVelocity();
+
+		// Calculate friction
+		b2Vec2 friction = b2Vec2(0.01, 0.01);
+		friction.x = -currentVelocity.x * friction.x;
+		friction.y = -currentVelocity.y * friction.y;
+
+		// Apply friction
+		desiredVel += friction;
+
+		// Calculate acceleration
+		const b2Vec2 acceleration = desiredVel;
+
+		// Calculate new velocity based on acceleration
+		b2Vec2 newVelocity;
+		newVelocity.x = currentVelocity.x + (acceleration.x * deltaTime);
+		newVelocity.y = currentVelocity.y + (acceleration.y * deltaTime);
+		body_->SetLinearVelocity(newVelocity);
+
+		//body_->ApplyLinearImpulse(b2Vec2(impulse.x, impulse.y), body_->GetWorldCenter(), true);
+	}
 
 	// TODO: replace getpos fun
 	position_.x = body_->GetPosition().x * scale_;
