@@ -95,6 +95,7 @@ void Network::InitTCP()
 			memcpy(buf + pbytesReceived, buf, bytesReceived);
 
 			pbytesReceived += bytesReceived;
+			std::cout << bytesReceived << " :: " << pbytesReceived << std::endl;
 			if (pbytesReceived >= pincomingPacketLength)
 			{
 				int headerSize = 6;
@@ -117,7 +118,8 @@ void Network::InitUDP()
 	//sockaddr_in hint;
 	UDPhint.sin_family = AF_INET; // AF_INET = IPv4 addresses
 	UDPhint.sin_port = htons(UDP_PORT); // Little to big endian conversion
-	inet_pton(AF_INET, ipAddress.c_str(), &UDPhint.sin_addr); // Convert from string to byte array
+	//inet_pton(AF_INET, ipAddress.c_str(), &UDPhint.sin_addr); // Convert from string to byte array
+	UDPhint.sin_addr.s_addr = INADDR_ANY;
 
 	UDPclientSocket = socket(AF_INET, SOCK_DGRAM, 0);
 	if (UDPclientSocket == INVALID_SOCKET)
@@ -126,22 +128,59 @@ void Network::InitUDP()
 		WSACleanup();
 		//return 1;
 	}
+
+	// Try and bind the socket to the IP and port
+	if (bind(UDPclientSocket, (SOCKADDR*)&UDPhint, sizeof(UDPhint)) == SOCKET_ERROR)
+	{
+		std::cout << "udp error" << std::endl;
+	}
 	
 	char buf[MAX_BUFFER_SIZE];
+
+	char ipstr[INET_ADDRSTRLEN];
+	void* addr = &UDPhint.sin_addr;
+	InetNtop(UDPhint.sin_family, addr, (PSTR)ipstr, sizeof(ipstr));
+	std::cout << "initUDP [" << ipstr << "]:: " << ntohs(UDPhint.sin_port) << std::endl;
+
+	int clientLength = sizeof(UDPhint);
+
+	char buffer[1024]; //SOCKET_BUFFER_SIZE
+	int flags = 0;
 
 	// UDP Receive
 	while (true)
 	{
-		ZeroMemory(buf, MAX_BUFFER_SIZE);
+		ZeroMemory(&buffer, sizeof(buffer));
 
-		int bytesReceived = recv(UDPclientSocket, buf, 4096, 0);
-		if (bytesReceived > 0)
+		int bytes_received = recvfrom(UDPclientSocket, buffer, sizeof(buffer), flags, (SOCKADDR*)&UDPhint, &clientLength);
+		if (bytes_received == SOCKET_ERROR)
 		{
-			// Send packet to messaging system
-			Message packet(std::string(buf, bytesReceived));
-			SendMessageSystem(packet);
+			//printf("recvfrom returned SOCKET_ERROR, WSAGetLastError() %d", WSAGetLastError());
+			continue;
 		}
+
+		//std::cout << "test2" << std::endl;
+
+		uint16_t packetLength;
+		memcpy(&packetLength, buffer, 2);
+		packetLength = htons(packetLength);
+
+		// Send packet to messaging system
+		Message packet(std::string(buffer, packetLength));
+		SendMessageSystem(packet);
+
+
+		////int bytesReceived = recv(UDPclientSocket, buf, 4096, 0);
+		//int bytesReceived = recvfrom(UDPclientSocket, buf, sizeof(buf), 0, (SOCKADDR*)&UDPhint, &clientLength);
+		//if (bytesReceived > 0)
+		//{
+		//	// Send packet to messaging system
+		//	Message packet(std::string(buf, bytesReceived));
+		//	SendMessageSystem(packet);
+		//}
 	}
+
+	closesocket(UDPclientSocket);
 }
 
 void Network::TCP_Send(std::string Packet)
@@ -179,9 +218,11 @@ void Network::onNotify(Message message)
 	memcpy(&packetSubType, message.getMessage().c_str() + bufferOffset, sizeof(uint16_t));
 	packetSubType = ntohs(packetSubType);
 	bufferOffset += sizeof(uint16_t);
+
+
 	// TODO: SKIPPED BY CASE LABEL
 	SnapshotPacket* snapshotPacket = new SnapshotPacket();
-	ObjectState* objectState = new ObjectState();
+	PlayerState* playerState = new PlayerState();
 	std::string newMessage("Snapshot::");
 
 	switch (packetType)
@@ -198,19 +239,24 @@ void Network::onNotify(Message message)
 
 			// Snapshot
 
-			memcpy(&objectState->positionX, message.getMessage().c_str() + bufferOffset, sizeof(uint16_t));
-			objectState->positionX = htons(objectState->positionX);
+			memcpy(&playerState->positionX, message.getMessage().c_str() + bufferOffset, sizeof(uint16_t));
+			playerState->positionX = htons(playerState->positionX);
 			bufferOffset += sizeof(uint16_t);
-			memcpy(&objectState->positionY, message.getMessage().c_str() + bufferOffset, sizeof(uint16_t));
-			objectState->positionY = htons(objectState->positionY);
+			memcpy(&playerState->positionY, message.getMessage().c_str() + bufferOffset, sizeof(uint16_t));
+			playerState->positionY = htons(playerState->positionY);
+			bufferOffset += sizeof(uint16_t);
+			memcpy(&playerState->angle, message.getMessage().c_str() + bufferOffset, sizeof(float));
+			playerState->angle = htons(playerState->angle);
+			bufferOffset += sizeof(float);
+			memcpy(&playerState->health, message.getMessage().c_str() + bufferOffset, sizeof(uint16_t));
+			playerState->health = htons(playerState->health);
 			bufferOffset += sizeof(uint16_t);
 
-			std::cout << objectState->positionX << "::" << objectState->positionY << std::endl;
-
-			snapshotPacket->objectStates.push_back(objectState);
+			snapshotPacket->playerStates.push_back(playerState);
 
 			SendMessageSystem(Message(newMessage, snapshotPacket));
 
+			//std::cout << playerState->positionX << "::" << playerState->positionY << std::endl;
 			break;
 		// Send Packet
 		case 10: // Input

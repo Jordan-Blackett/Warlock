@@ -16,6 +16,26 @@ void Player::init(b2World * world, sf::Vector2i position, sf::Vector2f size, int
 	EntityBox::init(world, position, size, scale);
 
 	rectangle_.setFillColor(sf::Color::Red);
+
+	//sf::Font font;
+	//if (!font.loadFromFile("arial.ttf"))
+	//{
+	//	// error...
+	//}
+
+	//healthTxt.setFont(font);
+	healthTxt.setString("100");
+	healthTxt.setCharacterSize(24);
+	healthTxt.setFillColor(sf::Color::Red);
+}
+
+void Player::Render(sf::RenderWindow & Window)
+{
+	EntityBox::Render(Window);
+
+	healthTxt.setString("100");
+	healthTxt.setPosition(10,10);
+	Window.draw(healthTxt);
 }
 
 InputPacket2 Player::movePlayer()

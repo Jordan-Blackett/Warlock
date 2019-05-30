@@ -21,13 +21,13 @@ void GameScreen::Initialize(sf::RenderWindow * Window)
 	// Init Player and Boxes
 	player->init(world, sf::Vector2i(200, 400), playerSize, scale);
 
-	EntityBox* box = new EntityBox();
-	box->init(world, sf::Vector2i(100, 100), boxSize, scale);
-	boxes.push_back(box);
+	// Arena
+	screenCenter_ = sf::Vector2f(ScreenWidth / 2, ScreenHeight / 2);
+	radiusSize_ = screenCenter_.y - 10;
+	arenaRing_.init(world, sf::Vector2i(screenCenter_), radiusSize_);
 
-	EntityBox * box1 = new EntityBox();
-	box1->init(world, sf::Vector2i(210, 210), boxSize, scale);
-	boxes.push_back(box1);
+	// Ball
+	//arenaDeathBall_.init(world, sf::Vector2i(screenCenter_), 20, scale);
 }
 
 void GameScreen::Update()
@@ -68,14 +68,18 @@ void GameScreen::Update()
 	{
 		SnapshotPacket* snapshot = snapshotQueue_.front();
 		snapshotQueue_.pop();
-		player->SetPosition(sf::Vector2i(snapshot->objectStates[0]->positionX, snapshot->objectStates[0]->positionY));
+		if (!snapshot->playerStates.empty())
+		{
+			player->SetPosition(sf::Vector2i(snapshot->playerStates[0]->positionX, snapshot->playerStates[0]->positionY));
+		}
 	}
 }
 
 void GameScreen::Render()
 {
-	for (auto b : boxes)
-		b->Render(*window_);
+	arenaRing_.Render(*window_);
+
+	//arenaDeathBall_.Render(*window_);
 
 	player->Render(*window_);
 }

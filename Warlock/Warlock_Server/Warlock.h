@@ -35,10 +35,13 @@ public:
 	void BufferToInputPacket();
 
 private:
+	// Network
+	Server_InputBuffer inputBuffer;
+
 	// Physics
 	b2World * world;
 	const float scale = 32.f; // Convert between pixel and real-world coordinates
-	const float verticalGravity = 1.f;
+	const float verticalGravity = 0.f;
 	const float horizontalGravity = 0.0f;
 
 	// Physics tick rate - Timestep
@@ -56,16 +59,13 @@ private:
 
 	Server_DealthBall arenaDeathBall_;
 
-	//Entities
+	// Entities
 	std::map<u_int64, Server_Player*> clientEntities;
-
-	// Boxes
-	sf::Vector2f boxSize{ sf::Vector2f(15, 15) };
+	sf::Vector2f entitiesSize{ sf::Vector2f(40, 40) };
 
 	sf::RenderWindow* window_;
 
 	void onNotify(Message message);
 
-	Server_InputBuffer inputBuffer;
 };
 

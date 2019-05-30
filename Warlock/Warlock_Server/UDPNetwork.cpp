@@ -11,7 +11,7 @@ UDPNetwork::~UDPNetwork()
 {
 }
 
-bool UDPNetwork::Init()
+SOCKET* UDPNetwork::Init()
 {
 	// Create a socket, notice that it is a user datagram socket (UDP)
 	UDPSocket_ = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -26,11 +26,11 @@ bool UDPNetwork::Init()
 	if (bind(UDPSocket_, (SOCKADDR*)&UDPHint, sizeof(UDPHint)) == SOCKET_ERROR)
 	{
 		//printf("bind failed: %d", WSAGetLastError());
-		return false;
+		return nullptr;
 	}
 
 	//std::cout << "UDP Successful." << std::endl;
-	return true;
+	return &UDPSocket_;
 }
 
 void UDPNetwork::Run() //UDP recv
@@ -53,14 +53,14 @@ void UDPNetwork::Run() //UDP recv
 			continue;
 		}
 
-		char clientIP[256];
-		ZeroMemory(clientIP, 256);
+		//char clientIP[256];
+		//ZeroMemory(clientIP, 256);
 
-		// Convert from byte array to chars
-		inet_ntop(AF_INET, &client.sin_addr, clientIP, 256);
+		//// Convert from byte array to chars
+		//inet_ntop(AF_INET, &client.sin_addr, clientIP, 256);
 
-		std::string test(buffer, 1024);
-		SendMessageSystem(&test);
+		//std::string test(buffer, 1024);
+		//SendMessageSystem(&test);
 
 		// Display the message / who sent it
 		//std::cout << "Message recv from " << clientIP << " : " << buffer << std::endl;

@@ -12,7 +12,7 @@ public:
 	UDPNetwork(int port, std::function<void(const std::string*)> handler);
 	~UDPNetwork();
 
-	bool Init();
+	SOCKET* Init();
 
 	void Run();
 

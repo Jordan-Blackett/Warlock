@@ -50,5 +50,10 @@ void Server_Entity::Render(sf::RenderWindow & Window)
 
 sf::Vector2i Server_Entity::GetPosition()
 {
-	return position_;
+	return sf::Vector2i(body_->GetPosition().x * scale_, body_->GetPosition().y * scale_);
+}
+
+float Server_Entity::GetAngle()
+{
+	return body_->GetAngle();
 }

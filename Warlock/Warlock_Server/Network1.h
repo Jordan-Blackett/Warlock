@@ -53,8 +53,10 @@ public:
 
 	void Listener_ConnectionReceived(SOCKET* socket);
 	
-	void Send(int clientSocket, std::string msg);
-	void SendAll(std::string msg);
+	void SendTCP(int clientSocket, std::string msg);
+	void SendUDP(int clientSocket, std::string msg);
+	void SendAllTCP(std::string msg);
+	void SendAllUDP(std::string msg);
 
 private:
 	void PrintExceptionalCondition(SOCKET socket);
@@ -65,9 +67,10 @@ private:
 
 	std::thread TCPlistenerThread_;
 	std::thread UDPReceiveThread_;
+	SOCKET* UDPSocket_;
 
 	std::map<u_int64, TCPSocket> connections_;
-	//std::vector<TCPSocket> connections_;
+	std::map<u_int64, SOCKADDR_IN> connectionsUDP_;
 
 	// Packet Data
 	char buffer_[128];
@@ -82,7 +85,7 @@ private:
 
 			PacketData* data = new PacketData();
 			data->snapshot = message.GetSnapshotPacket();
-			SendAll(CreatePacket2(1, 0, data));
+			SendAllUDP(CreatePacket2(1, 0, data));
 		}
 	}
 };

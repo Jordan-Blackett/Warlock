@@ -13,6 +13,8 @@
 #include "Client_InputPacket.h"
 #include "TestPacket.h"
 
+#include "Client_ArenaSphere.h"
+
 class GameScreen : public Screen
 {
 public:
@@ -26,6 +28,9 @@ public:
 	void InitPhysicalWorld();
 
 private:
+	// Network
+	std::queue<SnapshotPacket*> snapshotQueue_;
+
 	// Physics
 	b2World * world;
 	const float scale = 32.f; // Convert between pixel and real-world coordinates
@@ -40,6 +45,13 @@ private:
 	double simulationTimeLastUpdated_;
 	sf::Time simulationTicktime_;
 
+	// Level
+	sf::Vector2f screenCenter_;
+	Client_ArenaSphere arenaRing_;
+	float radiusSize_;
+
+	//Server_DealthBall arenaDeathBall_;
+
 	//Entities
 	// Player
 	Player* player = new Player();
@@ -49,18 +61,10 @@ private:
 	//std::vector<NetworkPlayer*> networkPlayers;
 	//sf::Vector2f networkPlayersSize{ sf::Vector2f(40, 40) };
 
-	// Boxes
-	sf::Vector2f boxSize{ sf::Vector2f(15, 15) };
-	std::vector<EntityBox*> boxes;
-	//std::vector<WorldWall*> walls;
-
-	std::queue<SnapshotPacket*> snapshotQueue_;
-
 	void onNotify(Message message)
 	{
 		if (message.getMessage() == "Snapshot::")
 		{
-			std::cout << message.getMessage() << std::endl;
 			snapshotQueue_.push(message.GetSnapshotPacket());
 		}
 	}

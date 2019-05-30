@@ -13,7 +13,7 @@
 #include "Client_SnapshotPacket.h"
 
 #define TCP_PORT 54000
-#define UDP_PORT 52000
+#define UDP_PORT 8000
 #define MAX_BUFFER_SIZE (25) //49152
 
 class Network : public Client_BusNode

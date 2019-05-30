@@ -16,6 +16,26 @@ void Server_Player::init(b2World * world, sf::Vector2i position, sf::Vector2f si
 	Server_EntityBox::init(world, position, size, scale);
 
 	rectangle_.setFillColor(sf::Color::Red);
+
+	//sf::Font font;
+	//if (!font.loadFromFile("arial.ttf"))
+	//{
+	//	// error...
+	//}
+
+	//healthTxt.setFont(font);
+	healthTxt.setString("100");
+	healthTxt.setCharacterSize(24);
+	healthTxt.setFillColor(sf::Color::Red);
+}
+
+void Server_Player::Render(sf::RenderWindow & Window)
+{
+	Server_EntityBox::Render(Window);
+
+	healthTxt.setString("100");
+	healthTxt.setPosition(10, 10);
+	Window.draw(healthTxt);
 }
 
 void Server_Player::MoveEntity(InputPacket* input, double deltaTime)
@@ -93,4 +113,9 @@ void Server_Player::MoveEntity(InputPacket* input, double deltaTime)
 	// TODO: replace getpos fun
 	position_.x = body_->GetPosition().x * scale_;
 	position_.y = body_->GetPosition().y * scale_;
+}
+
+int Server_Player::GetHealth()
+{
+	return health_;
 }

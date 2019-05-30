@@ -10,6 +10,7 @@ public:
 	~Server_Entity();
 
 	sf::Vector2i GetPosition();
+	float GetAngle();
 
 protected:
 	void InitDynamicBody(b2World* world);

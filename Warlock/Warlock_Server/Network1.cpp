@@ -45,7 +45,8 @@ void Network1::InitUDP()
 {
 	using namespace std::placeholders;
 	UDPNetwork UDP(UDP_PORT, std::bind(&Network1::SendToMessageSystem, this, _1));
-	if (UDP.Init())
+	UDPSocket_ = UDP.Init();
+	if (UDPSocket_ != nullptr)
 	{
 		UDP.Run();
 	}
@@ -116,16 +117,37 @@ void Network1::htonData(const PacketData & data)
 {
 	if (data.snapshot != nullptr)
 	{
-		for(auto const& obj : data.snapshot->objectStates)
+		for (auto const& player : data.snapshot->playerStates)
 		{
-			uint16_t u16;
-			u16 = htons(obj->positionX);
+			uint16_t u16; 
+			float f;
+			// Health
+			u16 = htons(player->positionX);
 			memcpy(buffer_ + bufferOffset_, &u16, sizeof(uint16_t));
 			bufferOffset_ += sizeof(uint16_t);
-			u16 = htons(obj->positionY);
+			u16 = htons(player->positionY);
+			memcpy(buffer_ + bufferOffset_, &u16, sizeof(uint16_t));
+			bufferOffset_ += sizeof(uint16_t);
+			// Angle
+			f = htons(player->angle);
+			memcpy(buffer_ + bufferOffset_, &f, sizeof(float));
+			bufferOffset_ += sizeof(float);
+			// Health
+			u16 = htons(player->health);
 			memcpy(buffer_ + bufferOffset_, &u16, sizeof(uint16_t));
 			bufferOffset_ += sizeof(uint16_t);
 		}
+
+		//for(auto const& obj : data.snapshot->objectStates)
+		//{
+		//	uint16_t u16;
+		//	u16 = htons(obj->positionX);
+		//	memcpy(buffer_ + bufferOffset_, &u16, sizeof(uint16_t));
+		//	bufferOffset_ += sizeof(uint16_t);
+		//	u16 = htons(obj->positionY);
+		//	memcpy(buffer_ + bufferOffset_, &u16, sizeof(uint16_t));
+		//	bufferOffset_ += sizeof(uint16_t);
+		//}
 	}
 }
 
@@ -247,23 +269,80 @@ void Network1::Listener_ConnectionReceived(SOCKET* socket)
 	SendMessageSystem(packet);
 	Notify();
 
+	// UDP
+	//SOCKADDR_IN* UDPHint = new SOCKADDR_IN();
+	SOCKADDR_IN UDPHinttest;
+	int addrsize = sizeof(UDPHinttest);
+	int ok = getpeername(*socket, (sockaddr*)&UDPHinttest, &addrsize);
+	UDPHinttest.sin_port = htons(8000);
+	std::cout << ok << std::endl;
+	//if (ok == ERROR) // TODO:  OK still returning 0(error)
+	//{
+		char ipstr[INET_ADDRSTRLEN];
+		void* addr = &UDPHinttest.sin_addr;
+		InetNtop(UDPHinttest.sin_family, addr, (PSTR)ipstr, sizeof(ipstr));
+		std::cout << "ConnectedUDP ["<< ipstr << "]:: " << ntohs(UDPHinttest.sin_port) << std::endl;
+
+		connectionsUDP_.insert(std::pair<unsigned int, SOCKADDR_IN>(*socket, UDPHinttest));
+	//}
+	//getpeername
+
+
 	// Send new connection ID to client
 	// loop through clients TODO:
 	// TODO: UDP SEND TCP SEND
 	//Send(connections_[*socket].socket_, connectionPacket); //UDP
 }
 
-void Network1::Send(int clientSocket, std::string msg)
+//void Network1::UDPConnectionReceived(SOCKET* socket)
+//{
+//	connections_.insert(std::pair<unsigned int, TCPSocket>(*socket, *socket));
+//
+//	// Send new connection ID to game
+//	std::string connectionPacket = CreatePacket(*socket, 0, 0, ""); //TODO:
+//	Message packet(connectionPacket);
+//	SendMessageSystem(packet);
+//	Notify();
+//
+//	// Send new connection ID to client
+//	// loop through clients TODO:
+//	// TODO: UDP SEND TCP SEND
+//	//Send(connections_[*socket].socket_, connectionPacket); //UDP
+//}
+
+void Network1::SendTCP(int clientSocket, std::string msg)
 {
-	send(clientSocket, msg.c_str(), msg.size() + 1, 0);
+	send(clientSocket, msg.c_str(), msg.size(), 0);
 }
 
-void Network1::SendAll(std::string msg)
+void Network1::SendUDP(int clientSocket, std::string msg)
+{
+	//sendto(clientSocket, msg.c_str(), msg.size(), 0, (sockaddr*)&UDPHint, sizeof(UDPHint));
+}
+
+void Network1::SendAllTCP(std::string msg)
 {
 	for (auto const& ID : connections_)
 	{
-		send(ID.first, msg.c_str(), msg.size() + 1, 0);
+		send(ID.first, msg.c_str(), msg.size(), 0);
 	}
+
+	std::cout << msg.size() << std::endl;
+}
+
+void Network1::SendAllUDP(std::string msg)
+{
+	for (auto const& ID : connectionsUDP_)
+	{
+		//sendto(*UDPSocket_, msg.c_str(), msg.size(), 0, (sockaddr*)&ID.second, sizeof(ID.second));
+		sendto(*UDPSocket_, msg.c_str(), msg.size(), 0, (sockaddr*)&ID.second, sizeof(ID.second));
+
+		char ipstr[INET_ADDRSTRLEN];
+		InetNtop(ID.second.sin_family, &ID.second.sin_addr, (PSTR)ipstr, sizeof(ipstr));
+		std::cout << "Sent UDP [" << ipstr << "]:: " << ntohs(ID.second.sin_port) << std::endl;
+	}
+
+	//std::cout << msg.size() << std::endl;
 }
 
 void Network1::PrintExceptionalCondition(SOCKET socket)

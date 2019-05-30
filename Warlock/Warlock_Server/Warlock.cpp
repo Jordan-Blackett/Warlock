@@ -18,10 +18,8 @@ bool Warlock::Init()
 	// Prepare the world
 	InitPhysicalWorld();
 
-	// Prepare the level
-	screenCenter_ = sf::Vector2f(ScreenWidth / 2, ScreenHeight / 2);
-
 	// Arena
+	screenCenter_ = sf::Vector2f(ScreenWidth / 2, ScreenHeight / 2);
 	radiusSize_ = screenCenter_.y - 10;
 	arenaRing_.init(world, sf::Vector2i(screenCenter_), radiusSize_);
 
@@ -104,19 +102,24 @@ void Warlock::Run()
 			// Client Entities
 			for (auto const& obj : clientEntities)
 			{
-				ObjectState* objectState = new ObjectState();
-				objectState->positionX = obj.second->GetPosition().x;
-				objectState->positionY = obj.second->GetPosition().y;
+				PlayerState* playerState = new PlayerState();
+				playerState->positionX = obj.second->GetPosition().x;
+				playerState->positionY = obj.second->GetPosition().y;
+				playerState->angle = obj.second->GetAngle();
+				playerState->health = obj.second->GetHealth();
 
-				snapshotPacket->objectStates.push_back(objectState);
+				snapshotPacket->playerStates.push_back(playerState);
 			}
 
 			// Objects
 
 			// Send Message To Network
-			std::string newMessage("Snapshot::");
-			SendMessageSystem(Message(newMessage, snapshotPacket));
-			Notify();
+			if (!clientEntities.empty())
+			{
+				std::string newMessage("Snapshot::");
+				SendMessageSystem(Message(newMessage, snapshotPacket));
+				Notify();
+			}
 
 			accumulator -= dt;
 		}
@@ -139,7 +142,7 @@ void Warlock::Run()
 void Warlock::CreateNewPlayer(unsigned int ClientID)
 {
 	Server_Player* box = new Server_Player();
-	box->init(world, sf::Vector2i(screenCenter_), boxSize, scale);
+	box->init(world, sf::Vector2i(screenCenter_), entitiesSize, scale);
 	clientEntities.insert(std::pair<unsigned int, Server_Player*>(ClientID, box));
 }
 
