@@ -57,6 +57,8 @@ private:
 	Player* player = new Player();
 	sf::Vector2f playerSize{ sf::Vector2f(40, 40) };
 
+	std::map<u_int64, Player*> players;
+
 	// Network Players
 	//std::vector<NetworkPlayer*> networkPlayers;
 	//sf::Vector2f networkPlayersSize{ sf::Vector2f(40, 40) };

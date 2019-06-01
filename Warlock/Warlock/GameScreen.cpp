@@ -62,7 +62,7 @@ void GameScreen::Update()
 		accumulator -= dt;
 	}
 
-	// TODO: Function - interp - etc
+	// TODO: Function - interp - etcww
 	// Consume snapshot
 	if (!snapshotQueue_.empty())
 	{
@@ -70,7 +70,19 @@ void GameScreen::Update()
 		snapshotQueue_.pop();
 		if (!snapshot->playerStates.empty())
 		{
-			player->SetPosition(sf::Vector2i(snapshot->playerStates[0]->positionX, snapshot->playerStates[0]->positionY));
+			for (auto const& p : snapshot->playerStates) {
+				if (players.find(p->playerID) != players.end())
+				{
+					players[p->playerID]->SetPosition(sf::Vector2i(p->positionX, p->positionY));
+				}
+				else
+				{
+					Player* newClientPlayer = new Player();
+					newClientPlayer->init(world, sf::Vector2i(0, 0), playerSize, scale);
+					newClientPlayer->SetPosition(sf::Vector2i(p->positionX, p->positionY));
+					players.insert(std::pair<u_int64, Player*>(p->playerID, newClientPlayer));
+				}
+			}
 		}
 	}
 }
@@ -81,6 +93,10 @@ void GameScreen::Render()
 
 	//arenaDeathBall_.Render(*window_);
 
+	for (auto const& p : players) {
+		p.second->Render(*window_);
+	}
+	
 	player->Render(*window_);
 }
 

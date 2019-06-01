@@ -239,20 +239,33 @@ void Network::onNotify(Message message)
 
 			// Snapshot
 
-			memcpy(&playerState->positionX, message.getMessage().c_str() + bufferOffset, sizeof(uint16_t));
-			playerState->positionX = htons(playerState->positionX);
-			bufferOffset += sizeof(uint16_t);
-			memcpy(&playerState->positionY, message.getMessage().c_str() + bufferOffset, sizeof(uint16_t));
-			playerState->positionY = htons(playerState->positionY);
-			bufferOffset += sizeof(uint16_t);
-			memcpy(&playerState->angle, message.getMessage().c_str() + bufferOffset, sizeof(float));
-			playerState->angle = htons(playerState->angle);
-			bufferOffset += sizeof(float);
-			memcpy(&playerState->health, message.getMessage().c_str() + bufferOffset, sizeof(uint16_t));
-			playerState->health = htons(playerState->health);
+			//numOfPlayersStates
+			memcpy(&snapshotPacket->numOfPlayersStates, message.getMessage().c_str() + bufferOffset, sizeof(uint16_t));
+			snapshotPacket->numOfPlayersStates = htons(snapshotPacket->numOfPlayersStates);
 			bufferOffset += sizeof(uint16_t);
 
-			snapshotPacket->playerStates.push_back(playerState);
+			// Player States
+			for (int i = 0; i < snapshotPacket->numOfPlayersStates; i++)
+			{
+				memcpy(&playerState->playerID, message.getMessage().c_str() + bufferOffset, sizeof(uint16_t));
+				playerState->playerID = htons(playerState->playerID);
+				bufferOffset += sizeof(uint16_t);
+				memcpy(&playerState->positionX, message.getMessage().c_str() + bufferOffset, sizeof(uint16_t));
+				playerState->positionX = htons(playerState->positionX);
+				bufferOffset += sizeof(uint16_t);
+				memcpy(&playerState->positionY, message.getMessage().c_str() + bufferOffset, sizeof(uint16_t));
+				playerState->positionY = htons(playerState->positionY);
+				bufferOffset += sizeof(uint16_t);
+				memcpy(&playerState->angle, message.getMessage().c_str() + bufferOffset, sizeof(float));
+				playerState->angle = htons(playerState->angle);
+				bufferOffset += sizeof(float);
+				memcpy(&playerState->health, message.getMessage().c_str() + bufferOffset, sizeof(uint16_t));
+				playerState->health = htons(playerState->health);
+				bufferOffset += sizeof(uint16_t);
+
+				snapshotPacket->playerStates.push_back(playerState);
+			}
+
 
 			SendMessageSystem(Message(newMessage, snapshotPacket));
 

@@ -85,7 +85,8 @@ private:
 
 			PacketData* data = new PacketData();
 			data->snapshot = message.GetSnapshotPacket();
-			SendAllUDP(CreatePacket2(1, 0, data));
+			SendAllTCP(CreatePacket2(1, 0, data));
+			//SendAllUDP(CreatePacket2(1, 0, data));
 		}
 	}
 };

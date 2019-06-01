@@ -103,6 +103,7 @@ void Warlock::Run()
 			for (auto const& obj : clientEntities)
 			{
 				PlayerState* playerState = new PlayerState();
+				playerState->playerID = obj.first;
 				playerState->positionX = obj.second->GetPosition().x;
 				playerState->positionY = obj.second->GetPosition().y;
 				playerState->angle = obj.second->GetAngle();

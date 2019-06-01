@@ -117,10 +117,20 @@ void Network1::htonData(const PacketData & data)
 {
 	if (data.snapshot != nullptr)
 	{
+		uint16_t u16; 
+		float f;
+
+		u16 = htons(data.snapshot->playerStates.size());
+		memcpy(buffer_ + bufferOffset_, &u16, sizeof(uint16_t));
+		bufferOffset_ += sizeof(uint16_t);
+
 		for (auto const& player : data.snapshot->playerStates)
 		{
-			uint16_t u16; 
-			float f;
+
+			// PlayerID
+			u16 = htons(player->playerID);
+			memcpy(buffer_ + bufferOffset_, &u16, sizeof(uint16_t));
+			bufferOffset_ += sizeof(uint16_t);
 			// Health
 			u16 = htons(player->positionX);
 			memcpy(buffer_ + bufferOffset_, &u16, sizeof(uint16_t));
@@ -270,7 +280,6 @@ void Network1::Listener_ConnectionReceived(SOCKET* socket)
 	Notify();
 
 	// UDP
-	//SOCKADDR_IN* UDPHint = new SOCKADDR_IN();
 	SOCKADDR_IN UDPHinttest;
 	int addrsize = sizeof(UDPHinttest);
 	int ok = getpeername(*socket, (sockaddr*)&UDPHinttest, &addrsize);
@@ -290,8 +299,7 @@ void Network1::Listener_ConnectionReceived(SOCKET* socket)
 
 	// Send new connection ID to client
 	// loop through clients TODO:
-	// TODO: UDP SEND TCP SEND
-	//Send(connections_[*socket].socket_, connectionPacket); //UDP
+	//Send(connections_[*socket].socket_, connectionPacket);
 }
 
 //void Network1::UDPConnectionReceived(SOCKET* socket)
@@ -327,7 +335,7 @@ void Network1::SendAllTCP(std::string msg)
 		send(ID.first, msg.c_str(), msg.size(), 0);
 	}
 
-	std::cout << msg.size() << std::endl;
+	//std::cout << msg.size() << std::endl;
 }
 
 void Network1::SendAllUDP(std::string msg)
@@ -339,7 +347,7 @@ void Network1::SendAllUDP(std::string msg)
 
 		char ipstr[INET_ADDRSTRLEN];
 		InetNtop(ID.second.sin_family, &ID.second.sin_addr, (PSTR)ipstr, sizeof(ipstr));
-		std::cout << "Sent UDP [" << ipstr << "]:: " << ntohs(ID.second.sin_port) << std::endl;
+		//std::cout << "Sent UDP [" << ipstr << "]:: " << ntohs(ID.second.sin_port) << std::endl;
 	}
 
 	//std::cout << msg.size() << std::endl;
