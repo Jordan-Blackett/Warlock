@@ -12,7 +12,7 @@ struct PacketHeader {
 	uint16_t msgSubType;
 };
 
-struct InputPacket2 {
+struct InputPacket {
 	uint8_t left = false;
 	uint8_t right = false;
 	uint8_t up = false;

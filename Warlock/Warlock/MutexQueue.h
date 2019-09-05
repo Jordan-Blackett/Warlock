@@ -4,14 +4,14 @@
 #include<mutex>
 
 template <typename T>
-class Client_MutexQueue
+class MutexQueue
 {
 public:
-	T pop() {
+	void pop() {
 		std::unique_lock<std::mutex> l(lock_);
 		auto val = queue_.front();
 		queue_.pop();
-		return val;
+		//return val;
 	}
 
 	void push(T item) {

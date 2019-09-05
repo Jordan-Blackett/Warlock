@@ -22,7 +22,7 @@ public:
 	float angle;
 };
 
-struct SnapshotPacket
+struct StatePacket
 {
 public:
 	uint16_t sequence;
