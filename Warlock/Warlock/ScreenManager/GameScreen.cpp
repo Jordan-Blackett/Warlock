@@ -1,6 +1,6 @@
 #include "GameScreen.h"
 
-
+#include "../MessagingSystem/MessagingSystem.h" // TODO: TEMP
 
 void GameScreen::Initialize(sf::RenderWindow * Window)
 {
@@ -175,8 +175,18 @@ void GameScreen::Render()
 	//}
 }
 
-void GameScreen::OnNotify(Message & message)
+void GameScreen::OnNotify(Message& message)
 {
+	message.GetCategoryFlags();
+	message.GetMessageType();
+
+	switch (message.GetMessageType())
+	{
+		case MessageType::NewConnect:
+			CreateNewPlayer(dynamic_cast<NewConnectionMessage*>(&message)->GetSocketIDPacket());
+	}
+
+	printf("HEllo");
 }
 
 void GameScreen::InitPhysicalWorld()

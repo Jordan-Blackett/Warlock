@@ -17,11 +17,24 @@
 int main() {
 	std::cout << "Hello World" << std::endl;
 
+	// TEMP!!!!
+	//bool server;
+	//std::cin >> server;
+
 	MessagingSystem messageBus;
 
-	// Initialze Network
-	ServerNetwork network(&messageBus);
-	if (network.Initialize()) {}
+	//if (server)
+	//{
+		// Initialze Network
+		ServerNetwork network(&messageBus);
+		if (network.Initialize()) {}
+	//}
+	//else
+	//{
+	//	// Initialze Network
+		////ClientNetwork network(&messageBus);
+		//if (network.Initialize()) {}
+	//}
 
 	sf::RenderWindow window(sf::VideoMode(ScreenWidth, ScreenHeight, 32), "Warlock!");
 

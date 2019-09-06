@@ -15,7 +15,8 @@ ScreenManager* ScreenManager::GetInstance()
 
 void ScreenManager::Initialize(MessagingSystem* messageBus, sf::RenderWindow * Window)
 {
-	BusNode::BusNode(messageBus);
+	//BusNode::BusNode(messageBus);
+	BusNode::Init(messageBus);
 
 	m_CurrentScreen = new GameScreen();
 	m_CurrentScreen->Initialize(Window);
@@ -23,7 +24,7 @@ void ScreenManager::Initialize(MessagingSystem* messageBus, sf::RenderWindow * W
 
 void ScreenManager::Update()
 {
-	//Notify();
+	Notify();
 	m_CurrentScreen->Update();
 }
 

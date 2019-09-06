@@ -13,6 +13,11 @@ public:
 		this->messageBus_ = messageBus;
 		this->messageBus_->AddReceiver(this->getNotifyFunc());
 	}
+	void Init(MessagingSystem* messageBus)
+	{
+		this->messageBus_ = messageBus;
+		this->messageBus_->AddReceiver(this->getNotifyFunc());
+	}
 	//~BusNode();
 
 protected:
@@ -26,7 +31,7 @@ protected:
 		return messageListener;
 	}
 
-	void SendMessageSystem(Message& message)
+	void SendMessageSystem(std::shared_ptr<Message> message)
 	{
 		messageBus_->sendMessage(message);
 	}

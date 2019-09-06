@@ -12,10 +12,12 @@
 
 #define BIT(x) (1 << x)
 
+class NewConnectionMessage;
+
 enum class MessageType
 {
 	None = 0,
-	Input, State
+	NewConnect, State, Input
 };
 
 enum MessageCategory
@@ -56,9 +58,9 @@ public:
 		m_Receivers.push_back(messageReceiver);
 	}
 
-	void sendMessage(Message& message)
+	void sendMessage(std::shared_ptr<Message> message)
 	{
-		m_Messages.push(&message);
+		m_Messages.push(std::move(message));
 	}
 
 	void Notify()
@@ -74,10 +76,23 @@ public:
 
 private:
 	std::vector<std::function<void(Message&)>> m_Receivers;
-	MutexQueue<Message*> m_Messages;
+	MutexQueue<std::shared_ptr<Message>> m_Messages;
 };
 
-// 
+class NewConnectionMessage : public Message
+{
+public:
+	NewConnectionMessage(int socketID)
+		: m_ConnectionID(socketID) {}
+
+	inline int GetSocketIDPacket() { return m_ConnectionID; }
+
+	EVENT_CLASS_CATEGORY(EventCategoryNetwork | EventStatePacket)
+	EVENT_CLASS_TYPE(State)
+
+protected:
+	int m_ConnectionID;
+};
 
 class StateMessage : public Message
 {

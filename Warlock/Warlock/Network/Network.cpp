@@ -21,6 +21,14 @@ bool Network::Initialize()
 		std::cout << "WSAStartup failed: " << WSAGetLastError() << std::endl;
 		return false;
 	}
+
+	//std::shared_ptr<NewConnectionMessage> test = std::make_shared<NewConnectionMessage>(10);
+	////std::shared_ptr<NewConnectionMessage> test(new NewConnectionMessage(10));
+	////NewConnectionMessage *newConnectionMessage = new NewConnectionMessage(100);
+	//SendMessageSystem(test);
+	//Notify();
+
+	printf("NETWORK: WSAStartup");
 }
 
 DWORD Network::TCPConsumer(void * sd_)
@@ -29,16 +37,16 @@ DWORD Network::TCPConsumer(void * sd_)
 	SOCKET sd = (SOCKET)sd_;
 
 	if (!TCPReceive(sd)) {
-		//BT_CORE_ERROR("NETWORK: Echo incoming packets failed");
+		printf("NETWORK: Echo incoming packets failed");
 		retval = 3;
 	}
 
 	//BT_CORE_WARN("NETWORK: Shutting connection down...");
 	if (ShutdownConnection(sd) != SOCKET_ERROR) {
-	//	//BT_CORE_INFO("NETWORK: Connection is down");
+		printf("NETWORK: Connection is down");
 	}
 	else {
-	//	//BT_CORE_ERROR("NETWORK: Connection shutdown failed");
+		printf("NETWORK: Connection shutdown failed");
 		retval = 3;
 	}
 
@@ -53,14 +61,14 @@ bool Network::TCPReceive(SOCKET sd)
 	do {
 		readBytes = recv(sd, acReadBuffer, BUFFER_SIZE, 0);
 		if (readBytes > 0) {
-			//BT_CORE_TRACE("NETWORK: TCP - Received {0} bytes from client.", readBytes);
+			printf("NETWORK: TCP - Received {0} bytes from client.", readBytes);
 		}
 		else if (readBytes == SOCKET_ERROR) {
 			//return false;
 		}
 	} while (readBytes != 0);
 
-	//BT_CORE_WARN("Connection closed by peer.");
+	printf("Connection closed by peer.");
 	return true;
 }
 
@@ -107,16 +115,16 @@ DWORD Network::UDPConsumer(SOCKET udpsocket, sockaddr_in hint)
 	int retval = 0;
 
 	if (!UDPReceive(udpsocket, hint)) {
-		//BT_CORE_ERROR("NETWORK: Echo incoming packets failed");
+		printf("NETWORK: Echo incoming packets failed");
 		retval = 3;
 	}
 
-	//BT_CORE_WARN("NETWORK: Shutting connection down...");
+	printf("NETWORK: Shutting connection down...");
 	if (ShutdownConnection(udpsocket) != SOCKET_ERROR) {
-		//BT_CORE_INFO("NETWORK: Connection is down");
+		printf("NETWORK: Connection is down");
 	}
 	else {
-		//BT_CORE_ERROR("NETWORK: Connection shutdown failed");
+		printf("NETWORK: Connection shutdown failed");
 		retval = 3;
 	}
 
@@ -257,42 +265,42 @@ bool ServerNetwork::Initialize()
 	Network::Initialize();
 
 	TCPThread_ = std::thread(&ServerNetwork::InitTCP, this, IP, PORT);
-	UDPThread_ = std::thread(&ServerNetwork::InitUDP, this, IP, PORT);
+	//UDPThread_ = std::thread(&ServerNetwork::InitUDP, this, IP, PORT);
 
 	return true;
 }
 
 void ServerNetwork::InitTCP(const char* address, int port)
 {
-	//BT_CORE_WARN("NETWORK: Establishing TCP Listener...");
+	printf("NETWORK: Establishing TCP Listener...\n");
 	SOCKET listeningSocket = CreateListenSocket(address, port);
 	if (listeningSocket == INVALID_SOCKET)
 	{
-		//BT_CORE_ERROR("NETWORK: ListeningSocket - INVALID_SOCKET.");
+		printf("NETWORK: ListeningSocket - INVALID_SOCKET.\n");
 		system("pause");
 		//return false;
 	}
-	//BT_CORE_INFO("NETWORK: TCP Listener Established.");
+	printf("NETWORK: TCP Listener Established.\n");
 
-	//BT_CORE_WARN("NETWORK: Waiting for connections...");
+	printf("NETWORK: Waiting for connections...\n");
 	while (1) {
 		AcceptConnections(listeningSocket);
-		//BT_CORE_INFO("Acceptor restarting...");
+		printf("Acceptor restarting...\n");
 	}
 }
 
 void ServerNetwork::InitUDP(const char * address, int port)
 {
-	//BT_CORE_WARN("NETWORK: Establishing UDP Socket...");
+	printf("NETWORK: Establishing UDP Socket...\n");
 	sockaddr_in hint = sockaddr_in();
 	SOCKET UDPSocket = CreateUDPSocket(address, port, hint);
 	if (UDPSocket == INVALID_SOCKET)
 	{
-		//BT_CORE_ERROR("NETWORK: UDPSocket - INVALID_SOCKET.");
+		printf("NETWORK: UDPSocket - INVALID_SOCKET.\n");
 		system("pause");
 	}
 
-	//BT_CORE_INFO("NETWORK: UDP Established.");
+	printf("NETWORK: UDP Established.\n");
 	//UDPConsumer(UDPSocket, hint);
 }
 
@@ -301,12 +309,13 @@ SOCKET ServerNetwork::CreateListenSocket(const char * address, int port)
 	u_long interfaceAddr = InetPton(AF_INET, address, &interfaceAddr);
 	if (interfaceAddr != INADDR_NONE)
 	{
-		SOCKET listeningSocket = socket(AF_INET, SOCK_STREAM, 0);
+		SOCKET listeningSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 		if (listeningSocket != INVALID_SOCKET)
 		{
 			sockaddr_in hint;
 			hint.sin_family = AF_INET;
-			hint.sin_addr.s_addr = interfaceAddr;
+			//hint.sin_addr.s_addr = interfaceAddr;
+			hint.sin_addr.s_addr = INADDR_ANY;
 			hint.sin_port = htons(port);
 
 			if (bind(listeningSocket, (sockaddr*)&hint, sizeof(hint)) != SOCKET_ERROR)
@@ -319,12 +328,12 @@ SOCKET ServerNetwork::CreateListenSocket(const char * address, int port)
 			else
 			{
 				// Failed to bind socket
-				//BT_CORE_ERROR("NETWORK: Unable To Bind Listen Socket.");
+				printf("NETWORK: Unable To Bind Listen Socket.\n");
 				//CleanUp();
 				return INVALID_SOCKET;
 			}
+			return listeningSocket;
 		}
-		return listeningSocket;
 	}
 	return INVALID_SOCKET;
 }
@@ -336,37 +345,68 @@ void ServerNetwork::AcceptConnections(SOCKET ListeningSocket)
 
 	while (true) {
 		SOCKET sd = accept(ListeningSocket, (sockaddr*)&sinRemote, &addrSize);
+		//SOCKET sd = accept(ListeningSocket, NULL, NULL);
 		if (sd != INVALID_SOCKET) {
-			//BT_CORE_INFO("NETWORK: Accepted Connection From {0} : {1}", inet_ntoa(sinRemote.sin_addr), ntohs(sinRemote.sin_port));
+			//printf("NETWORK: Accepted Connection From {0} : {1}\n", inet_ntoa(sinRemote.sin_addr), ntohs(sinRemote.sin_port));
+			std::cout << "New connection: " << sd << std::endl;
+
+			ConnectionReceived(sd);
 
 			DWORD threadID;
 			CreateThread(0, 0, TCPConsumer, (void*)sd, 0, &threadID);
 		}
 		else {
 			//BT_CORE_WARN("NETWORK: Accept() Failed.");
+			//std::cout << "Connection failed: " << newClientSocket << std::endl;
 			return;
 		}
 	}
+}
+
+void ServerNetwork::ConnectionReceived(SOCKET newSocket)
+{
+	m_Connections.insert(std::pair<unsigned int, SOCKET>(newSocket, newSocket));
+
+	// Send new connection ID to game
+	//NewConnectionMessage newConnectionMessage(newSocket);
+	SendMessageSystem(std::make_shared<NewConnectionMessage>(newSocket));
+	//std::shared_ptr<NewConnectionMessage> newConnectionMessage = std::make_shared<NewConnectionMessage>(newSocket);
+	//SendMessageSystem(newConnectionMessage);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Client Network ///////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+ClientNetwork::ClientNetwork(MessagingSystem * messageBus) 
+	: Network(messageBus)
+{
+}
+
+bool ClientNetwork::Initialize()
+{
+	Network::Initialize();
+
+	TCPThread_ = std::thread(&ClientNetwork::InitTCP, this, IP, PORT);
+	//UDPThread_ = std::thread(&ClientNetwork::InitUDP, this, IP, PORT);
+
+	return false;
+}
+
 void ClientNetwork::InitTCP(const char* address, int port)
 {
-	//BT_CORE_WARN("NETWORK: Establishing TCP Listener...");
+	printf("NETWORK: Establishing TCP Connection\n");
 	SOCKET listeningSocket = CreateTCPSocket(address, port);
 	if (listeningSocket == INVALID_SOCKET)
 	{
-		//BT_CORE_ERROR("NETWORK: ListeningSocket - INVALID_SOCKET.");
+		printf("NETWORK: ListeningSocket - INVALID_SOCKET.\n");
 		system("pause");
 		//return false;
 	}
 
 	while (1) {
+		printf("NETWORK: TCPReceive.\n");
 		TCPReceive(listeningSocket);
-		//BT_CORE_INFO("Acceptor restarting...");
 	}
 
 //char buf[MAX_BUFFER_SIZE];
@@ -495,17 +535,18 @@ SOCKET ClientNetwork::CreateTCPSocket(const char * address, int port)
 	u_long interfaceAddr = InetPton(AF_INET, address, &interfaceAddr);
 	if (interfaceAddr != INADDR_NONE)
 	{
-		SOCKET clientSocket = socket(AF_INET, SOCK_STREAM, 0);
+		SOCKET clientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 		if (clientSocket != INVALID_SOCKET)
 		{
 			sockaddr_in hint;
 			hint.sin_family = AF_INET;
-			hint.sin_addr.s_addr = interfaceAddr;
+			//hint.sin_addr.s_addr = interfaceAddr;
+			InetPton(AF_INET, "127.0.0.1", &hint.sin_addr.s_addr);
 			hint.sin_port = htons(port);
 
 			if (connect(clientSocket, (sockaddr*)&hint, sizeof(hint)) != SOCKET_ERROR)
 			{
-
+				printf("connect to the server: %d", WSAGetLastError());
 			}
 			else
 			{

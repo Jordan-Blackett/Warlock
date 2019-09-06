@@ -45,7 +45,7 @@ private:
 	//std::queue<SnapshotPacket*> snapshotQueue_;
 
 	// Entities
-	std::map<u_int64, Player*> m_ClientEntities;
+	std::map<uint32_t, Player*> m_ClientEntities;
 
 	// Physics
 	b2World* m_World;

@@ -29,7 +29,7 @@ void Player::Render(sf::RenderWindow & window)
 	//Window.draw(healthTxt);
 }
 
-//InputPacket2 Player::movePlayer()
+//InputPacket Player::movePlayer()
 //{
 //	enum _moveState {
 //		MS_STOP,

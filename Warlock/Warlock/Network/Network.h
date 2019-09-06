@@ -7,10 +7,10 @@
 
 #include "../MessagingSystem/BusNode.h"
 
+#include <map>
 //#include <iostream>
 //#include <string>
 //#include <vector>
-//#include <map>
 //#include "TestPacket.h"
 //#include "Client_SnapshotPacket.h"
 
@@ -18,12 +18,10 @@
 #define UDP_PORT 8000
 #define MAX_BUFFER_SIZE (25) //49152
 
-#define PORT 5555
+#define PORT 54000
 #define BUFFER_SIZE 1024
 
 #define IP "127.0.0.1"
-
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
 
 class Network : public BusNode
 {
@@ -81,15 +79,20 @@ public:
 
 	SOCKET CreateListenSocket(const char* address, int port);
 	void AcceptConnections(SOCKET ListeningSocket);
+	void ConnectionReceived(SOCKET newSocket);
 
 private:
-	//std::map<u_int64, TCPSocket> m_Connections;
+	std::map<u_int64, SOCKET> m_Connections;
 	//std::map<u_int64, SOCKADDR_IN> m_ConnectionsUDP;
 };
 
 class ClientNetwork : public Network
 {
 public:
+	ClientNetwork(MessagingSystem* messageBus);
+
+	virtual bool Initialize() override;
+
 	virtual void InitTCP(const char* address, int port) override;
 	virtual void InitUDP(const char* address, int port) override;
 

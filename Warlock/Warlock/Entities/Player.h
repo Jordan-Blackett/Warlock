@@ -19,4 +19,3 @@ private:
 	// TODO: move to ui class
 	//sf::Text healthTxt;
 };
-
