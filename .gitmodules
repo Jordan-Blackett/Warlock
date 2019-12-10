@@ -1,0 +1,12 @@
+[submodule "BlackThorn/vendor/spdlog"]
+	path = BlackThorn/vendor/spdlog
+	url = https://github.com/gabime/spdlog
+[submodule "BlackThorn/vendor/GLFW"]
+	path = BlackThorn/vendor/GLFW
+	url = https://github.com/Jordan-Blackett/glfw
+[submodule "BlackThorn/vendor/imgui"]
+	path = BlackThorn/vendor/imgui
+	url = https://github.com/Jordan-Blackett/imgui
+[submodule "BlackThorn/vendor/glm"]
+	path = BlackThorn/vendor/glm
+	url = https://github.com/g-truc/glm

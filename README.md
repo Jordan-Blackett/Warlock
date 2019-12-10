@@ -1,2 +1,2 @@
-# Warlock
-Multiplayer Physics-Based Arena Brawler
+# BlackThorn
+BlackThorn Engine
