@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Entity.h"
+#include "Entities/Entity.h"
 
 class Level
 {
@@ -21,6 +21,8 @@ private:
 	void GameOver();
 private:
 	Entity m_Player;
+
+	std::vector<Entity*> Entities;
 
 	bool m_GameOver = false;
 

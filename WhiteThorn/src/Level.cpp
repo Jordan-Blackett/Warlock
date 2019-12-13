@@ -6,7 +6,11 @@ using namespace BlackThorn;
 
 void Level::Init()
 {
-	m_Player.LoadAssets();
+	m_Player.LoadAssets("assets/sprites/classes/wizard_spritesheet.png");
+
+	Entity* Cleric = new Entity();
+	Cleric->LoadAssets("assets/sprites/classes/cleric_spritesheet.png");
+	Entities.push_back(Cleric);
 }
 
 void Level::OnUpdate(BlackThorn::Timestep ts)
@@ -17,6 +21,10 @@ void Level::OnUpdate(BlackThorn::Timestep ts)
 void Level::OnRender()
 {
 	m_Player.OnRender();
+
+	for (auto const& entity : Entities) {
+		entity->OnRender();
+	}
 }
 
 void Level::OnImGuiRender()

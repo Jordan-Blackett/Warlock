@@ -11,6 +11,8 @@
 
 #include "BlackThorn/ImGui/ImGuiLayer.h"
 
+#include "BlackThorn/Network/Network.h"
+
 namespace BlackThorn {
 
 	class BLACKTHORN_API Application
@@ -28,6 +30,15 @@ namespace BlackThorn {
 
 		inline static Application& Get() { return *s_Instance; }
 		inline Window& GetWindow() { return *m_Window; }
+
+		inline Network& GetNetwork() { return *m_Network; }
+		inline void SetNetwork(Network* network) { m_Network = network; }
+		inline bool IsNetNull() {
+			if (m_Network == nullptr)
+				return true;
+			else
+				return false;
+		}
 	private:
 		bool OnWindowClose(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);
@@ -39,11 +50,15 @@ namespace BlackThorn {
 		LayerStack m_LayerStack;
 		float m_LastFrameTime = 0.0f;
 
+		Network* m_Network;
 	private:
 		static Application* s_Instance;
 	};
 
 	// To be defined in CLIENT
 	Application* CreateApplication();
+
+	//inline Network* GetNetwork() { return Application::GetNetwork(); }
+	//inline void SetNetwork(Network* network) { Application::SetNetwork(network); }
 
 }

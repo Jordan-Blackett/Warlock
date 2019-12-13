@@ -16,7 +16,6 @@ namespace BlackThorn {
 		BT_CORE_ASSERT(data, "Failed to load image!");
 		m_Width = width;
 		m_Height = height;
-		
 
 		GLenum internalFormat = 0, dataFormat = 0;
 		if (channels == 4)
@@ -24,7 +23,7 @@ namespace BlackThorn {
 			internalFormat = GL_RGBA8;
 			dataFormat = GL_RGBA;
 		}
-		else if(channels == 3) 
+		else if (channels == 3)
 		{
 			internalFormat = GL_RGB8;
 			dataFormat = GL_RGB;
@@ -32,7 +31,7 @@ namespace BlackThorn {
 
 		BT_CORE_ASSERT(internalFormat & dataFormat, "Format not supported.");
 
-		glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &m_RendererID);
+		glCreateTextures(GL_TEXTURE_2D, 1, &m_RendererID);
 		glTextureStorage2D(m_RendererID, 1, internalFormat, m_Width, m_Height);
 
 		glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -47,6 +46,7 @@ namespace BlackThorn {
 	}
 
 	OpenGLTexture2D::OpenGLTexture2D(const std::string& path, const int tilteWidth, const int tilteHeight)
+		: m_Path(path)
 	{
 		int width, height, channels;
 		stbi_set_flip_vertically_on_load(1);
@@ -80,8 +80,8 @@ namespace BlackThorn {
 		{
 			GLuint temp_tex = 0;
 			glCreateTextures(GL_TEXTURE_2D, 1, &temp_tex);
-			glTextureStorage2D(temp_tex, 1, GL_RGBA8, m_Width, m_Height);
-			glTextureSubImage2D(temp_tex, 0, 0, 0, m_Width, m_Height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+			glTextureStorage2D(temp_tex, 1, internalFormat, m_Width, m_Height);
+			glTextureSubImage2D(temp_tex, 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE, data);
 
 			for (GLsizei i = 0; i < tile_count; ++i)
 			{

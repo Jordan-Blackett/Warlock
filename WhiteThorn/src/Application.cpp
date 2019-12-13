@@ -10,7 +10,7 @@
 
 #include "RenderLayer2D.h"
 
-#include "Entity.h"
+#include "Entities/Entity.h"
 
 class NetworkLayer : public BlackThorn::Layer
 {
@@ -19,20 +19,20 @@ public:
 		: Layer("NetworkLayer")
 	{
 		// Network
-		if (BlackThorn::Network::Initialize())
-		{
-			BT_CORE_WARN("Initialized Network!");
+		//if (BlackThorn::Network::Initialize())
+		//{
+		//	BT_CORE_WARN("Initialized Network!");
 
-			m_TCPListenerThread = std::thread(BlackThorn::Network::InitializeTCP, IP, PORT);
-			m_UDPThread = std::thread(BlackThorn::Network::InitializeUDP, IP, PORT);
-		}
+		//	//m_TCPListenerThread = std::thread(BlackThorn::Network::InitializeTCP, IP, PORT);
+		//	//m_UDPThread = std::thread(BlackThorn::Network::InitializeUDP, IP, PORT);
+		//}
 	}
 
 	virtual ~NetworkLayer() override
 	{
-		BlackThorn::Network::CleanUp();
-		m_TCPListenerThread.join();
-		m_UDPThread.join();
+		//BlackThorn::Network::CleanUp();
+		//m_TCPListenerThread.join();
+		//m_UDPThread.join();
 		//std::terminate(m_TCPListenerThread);
 	}
 
