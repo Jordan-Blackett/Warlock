@@ -28,4 +28,48 @@ private:
 	float m_Time = 0.0f;
 
 	BlackThorn::Ref<BlackThorn::Texture2D> m_EntityTexture;
+
+	// Animation
+
+	enum class AnimationStates {
+		Idle = 0,
+		Gesture = 1,
+		Walk = 2,
+		Attack = 3,
+		Dealth = 4
+	};
+
+	AnimationStates animationStates;
+
+	bool animated = false;
+
+	void Play(const char* animationName);
+
+	struct Animation {
+		int m_Index;
+		int m_Frames;
+		float m_Speed;
+		bool m_RequiredFinish;
+
+		Animation() {}
+		Animation(int index, int frames, float speed, bool finish)
+		{
+			m_Index = index;
+			m_Frames = frames;
+			m_Speed = speed;
+			m_RequiredFinish = finish;
+		}
+	};
+
+	std::map<const char*, Animation> animations;
+	unsigned int AnimationIndex = 0;
+	unsigned int AnimationFrames = 0;
+	float AnimationSpeed = 0;
+
+	float animDeltaTime = 0;
+	char* currentAnimationName = { "Walk" };
+	bool currentRequiredFinish = false;
+	bool CurrentAnimationFinished = false;
+	int CurrentAnimationFrame = 0;
+
 };

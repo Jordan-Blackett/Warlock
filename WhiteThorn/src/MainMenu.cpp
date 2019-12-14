@@ -28,6 +28,7 @@ void MainMenu::Init()
 
 void MainMenu::OnUpdate(BlackThorn::Timestep ts)
 {
+	m_Player->OnUpdate(ts);
 }
 
 void MainMenu::OnRender()
